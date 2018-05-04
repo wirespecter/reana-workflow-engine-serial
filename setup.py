@@ -62,7 +62,10 @@ setup_requires = [
     'pytest-runner>=2.7',
 ]
 
-install_requires = []
+install_requires = [
+    'bravado>=9.0.6',
+    'celery>=4.1.0',
+]
 
 packages = find_packages()
 

@@ -24,7 +24,7 @@ from __future__ import absolute_import
 
 from celery import Celery
 
-from reana_workflow_engine_serial.config import BROKER
+from .config import BROKER
 
 app = Celery('tasks',
              broker=BROKER,

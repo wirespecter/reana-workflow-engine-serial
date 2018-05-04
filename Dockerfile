@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # This file is part of REANA.
 # Copyright (C) 2018 CERN.
 #
@@ -20,19 +18,23 @@
 # granted to it by virtue of its status as an Intergovernmental Organization or
 # submit itself to any jurisdiction.
 
-"""Rest API endpoint for workflow management."""
+FROM python:3.6
 
-from __future__ import absolute_import
+ENV TERM=xterm
+RUN apt update && \
+    apt install -y vim emacs-nox && \
+    apt install nodejs -y && \
+    pip install --upgrade pip
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+ADD . /code
+WORKDIR /code
 
-from reana_workflow_engine_serial.config import SQLALCHEMY_DATABASE_URI
+# Debug off by default
+ARG DEBUG=false
+RUN if [ "${DEBUG}" = "true" ]; then pip install -r requirements-dev.txt; pip install -e .[all]; else pip install .[all]; fi;
 
+ARG QUEUE_ENV=default
+ENV QUEUE_ENV ${QUEUE_ENV}
+ENV PYTHONPATH=/workdir
 
-def load_session():
-    """Load SQLAlchemy database session."""
-    engine = create_engine(SQLALCHEMY_DATABASE_URI)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
+CMD celery -A reana_workflow_engine_serial.celeryapp worker -l info -Q ${QUEUE_ENV}

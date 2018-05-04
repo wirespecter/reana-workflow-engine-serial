@@ -20,25 +20,21 @@
 # granted to it by virtue of its status as an Intergovernmental Organization or
 # submit itself to any jurisdiction.
 
-"""REANA Workflow Engine Serial configuration."""
+"""REANA Workflow Engine Serial config."""
 
 import os
 
-BROKER = os.getenv("RABBIT_MQ", "amqp://test:1234@message-broker.default.svc.cluster.local//")
-# BROKER = os.getenv("RABBIT_MQ", "amqp://reana:reana@localhost:5672/reanahost")
-JOBCONTROLLER_HOST = os.getenv("JOB_CONTROLLER_HOST", 'job-controller.default.svc.cluster.local')
-
-INPUTS_DIRECTORY_RELATIVE_PATH = 'inputs'
-"""Represents the relative path to the inputs directory (populated by RWC)"""
-
-SHARED_VOLUME = os.getenv('SHARED_VOLUME', '/reana/default')
+SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/reana/default')
 """Path to the mounted REANA shared volume."""
 
-REANA_DB_FILE = './reana.db'
-"""REANA SQLite db file."""
+BROKER = os.getenv('RABBIT_MQ', 'amqp://test:1234@'
+                   'message-broker.default.svc.cluster.local//')
 
-SQLALCHEMY_DATABASE_URI = \
-    'sqlite:///{SHARED_VOLUME}/{REANA_DB_FILE}'.format(
-        SHARED_VOLUME=SHARED_VOLUME,
-        REANA_DB_FILE=REANA_DB_FILE)
-"""SQL database URI."""
+COMPONENTS_DATA = {
+    'reana-job-controller': (
+        'http://{address}:{port}'.format(
+            address=os.getenv('JOB_CONTROLLER_SERVICE_HOST', '0.0.0.0'),
+            port=os.getenv('JOB_CONTROLLER_SERVICE_PORT_HTTP', '5000')),
+        'reana_job_controller.json')
+}
+"""REANA Workflow Controller address."""
