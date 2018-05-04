@@ -27,8 +27,8 @@ import os
 from time import sleep
 
 from .api_client import create_openapi_client
-from .config import SHARED_VOLUME_PATH
 from .celeryapp import app
+from .config import SHARED_VOLUME_PATH
 
 log = logging.getLogger(__name__)
 outputs_dir_name = 'outputs'
@@ -49,7 +49,8 @@ def get_job_status(job_id):
 def run_serial_workflow(workflow_uuid, workflow_workspace,
                         workflow=None, workflow_json=None,
                         toplevel=os.getcwd(), parameters=None):
-    workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH, workflow_workspace)
+    workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
+                                          workflow_workspace)
 
     # use API of Workflow Controller and Job Controller to update status
     # and not have access to the DB.
