@@ -27,8 +27,18 @@ import os
 SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/reana/default')
 """Path to the mounted REANA shared volume."""
 
-BROKER = os.getenv('RABBIT_MQ', 'amqp://test:1234@'
-                   'message-broker.default.svc.cluster.local//')
+BROKER_URL = os.getenv('RABBIT_MQ_URL',
+                       'message-broker.default.svc.cluster.local')
+
+BROKER_USER = os.getenv('RABBIT_MQ_USER', 'test')
+
+BROKER_PASS = os.getenv('RABBIT_MQ_PASS', '1234')
+
+BROKER_PORT = os.getenv('RABBIT_MQ_PORT', 5672)
+
+BROKER = os.getenv('RABBIT_MQ', 'amqp://{0}:{1}@{2}//'.format(BROKER_USER,
+                                                              BROKER_PASS,
+                                                              BROKER_URL))
 
 COMPONENTS_DATA = {
     'reana-job-controller': (
@@ -38,3 +48,15 @@ COMPONENTS_DATA = {
         'reana_job_controller.json')
 }
 """REANA Workflow Controller address."""
+
+INPUTS_DIRECTORY_RELATIVE_PATH = 'inputs'
+"""Represents the relative path to the inputs directory (populated by RWC)"""
+
+OUTPUTS_DIRECTORY_RELATIVE_PATH = 'outputs'
+"""Represents the relative path to the outputs directory."""
+
+CODE_DIRECTORY_RELATIVE_PATH = 'code'
+"""Represents the relative path to the code directory (populated by RWC)"""
+
+LOGS_DIRECTORY_RELATIVE_PATH = 'logs'
+"""Represents the relative path to the logs directory."""

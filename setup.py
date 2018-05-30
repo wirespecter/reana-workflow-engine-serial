@@ -65,6 +65,7 @@ setup_requires = [
 install_requires = [
     'bravado>=9.0.6',
     'celery>=4.1.0',
+    'pika==0.11.2',
 ]
 
 packages = find_packages()

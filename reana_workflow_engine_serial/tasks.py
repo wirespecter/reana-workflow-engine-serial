@@ -24,11 +24,14 @@ from __future__ import absolute_import, print_function
 
 import logging
 import os
+import json
+import pika
 from time import sleep
 
 from .api_client import create_openapi_client
 from .celeryapp import app
-from .config import SHARED_VOLUME_PATH
+from .config import (SHARED_VOLUME_PATH, OUTPUTS_DIRECTORY_RELATIVE_PATH,
+                     BROKER_USER, BROKER_PASS, BROKER_URL, BROKER_PORT)
 
 log = logging.getLogger(__name__)
 outputs_dir_name = 'outputs'
@@ -44,6 +47,39 @@ def get_job_status(job_id):
     return response
 
 
+def declare_job_status_queue():
+    broker_credentials = pika.PlainCredentials(BROKER_USER,
+                                               BROKER_PASS)
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(BROKER_URL,
+                                  BROKER_PORT,
+                                  '/',
+                                  broker_credentials))
+    channel = connection.channel()
+    channel.queue_declare(queue='jobs-status')
+    return channel
+
+
+def publish_workflow_status(channel, workflow_uuid, status, message=None):
+    """Update database workflow status.
+
+    :param workflow_uuid: UUID which represents the workflow.
+    :param status: String that represents the analysis status.
+    :param status_message: String that represents the message related with the
+       status, if there is any.
+    """
+    log.info('Publishing Workflow: {0} Status: {1}'.format(workflow_uuid,
+                                                           status))
+    channel.basic_publish(exchange='',
+                          routing_key='jobs-status',
+                          body=json.dumps({"workflow_uuid": workflow_uuid,
+                                           "status": status,
+                                           "message": message}),
+                          properties=pika.BasicProperties(
+                              delivery_mode=2,  # msg persistent
+                          ))
+
+
 @app.task(name='tasks.run_serial_workflow',
           ignore_result=True)
 def run_serial_workflow(workflow_uuid, workflow_workspace,
@@ -51,28 +87,41 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                         toplevel=os.getcwd(), parameters=None):
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
+    channel = declare_job_status_queue()
 
-    # use API of Workflow Controller and Job Controller to update status
-    # and not have access to the DB.
-    # TODO
     for step in workflow_json['steps']:
         job_spec = {
             'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
                                     'serial_experiment'),
             'docker_img': step['environment'],
-            'cmd': ' && '.join(step['commands']),
+            'cmd': 'bash -c "cd {0} ; {1} "'.format(
+                workflow_workspace, ' ; '.join(step['commands'])),
             'max_restart_count': 0,
             'env_vars': {},
-            'job_type': 'kubernetes'
+            'job_type': 'kubernetes',
+            'shared_file_system': True,
         }
         response, http_response = rjc_api_client.jobs.create_job(
             job=job_spec).result()
         job_id = str(response['job_id'])
-        print('job_id:', job_id)
         job_status = get_job_status(job_id)
         while job_status.status not in ['succeeded', 'failed']:
             job_status = get_job_status(job_id)
-            print('Status is still:', job_status.status)
+            publish_workflow_status(channel, workflow_uuid, 1)
             sleep(1)
 
-    print('done')
+        if job_status.status == 'succeeded':
+            publish_workflow_status(channel, workflow_uuid, 2)
+        else:
+            publish_workflow_status(channel, workflow_uuid, 3)
+        workflow_workspace_content = \
+            os.path.join(workflow_workspace, '*')
+        absolute_outputs_directory_path = os.path.join(
+            workflow_workspace, '..', OUTPUTS_DIRECTORY_RELATIVE_PATH)
+        log.info('Copying {source} to {dest}.'.format(
+            source=workflow_workspace_content,
+            dest=absolute_outputs_directory_path))
+        os.system('cp -R {source} {dest}'.format(
+            source=workflow_workspace_content,
+            dest=absolute_outputs_directory_path))
+        log.info('Workflow outputs copied to `/outputs` directory.')
