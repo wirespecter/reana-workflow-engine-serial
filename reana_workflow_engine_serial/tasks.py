@@ -80,6 +80,24 @@ def publish_workflow_status(channel, workflow_uuid, status, message=None):
                           ))
 
 
+def escape_shell_arg(shell_arg):
+    """Escape shell argument shell_arg by placing it within
+    single-quotes.  Any single quotes found within the shell argument
+    string will be escaped.
+    @param shell_arg: The shell argument to be escaped.
+    @type shell_arg: string
+    @return: The single-quote-escaped value of the shell argument.
+    @rtype: string
+    @raise TypeError: if shell_arg is not a string.
+    """
+    if type(shell_arg) is not str:
+        msg = "ERROR: escape_shell_arg() expected string argument but " \
+              "got '%s' of type '%s'." % (repr(shell_arg), type(shell_arg))
+        raise TypeError(msg)
+
+    return "%s" % shell_arg.replace('"', '\\"')
+
+
 @app.task(name='tasks.run_serial_workflow',
           ignore_result=True)
 def run_serial_workflow(workflow_uuid, workflow_workspace,
@@ -89,39 +107,53 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                           workflow_workspace)
     channel = declare_job_status_queue()
 
+    last_step = 'START'
     for step in workflow_json['steps']:
-        job_spec = {
-            'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
-                                    'serial_experiment'),
-            'docker_img': step['environment'],
-            'cmd': 'bash -c "cd {0} ; {1} "'.format(
-                workflow_workspace, ' ; '.join(step['commands'])),
-            'max_restart_count': 0,
-            'env_vars': {},
-            'job_type': 'kubernetes',
-            'shared_file_system': True,
-        }
-        response, http_response = rjc_api_client.jobs.create_job(
-            job=job_spec).result()
-        job_id = str(response['job_id'])
-        job_status = get_job_status(job_id)
-        while job_status.status not in ['succeeded', 'failed']:
+        last_command = 'START'
+        for command in step['commands']:
+            job_spec = {
+                'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
+                                        'serial_experiment'),
+                'docker_img': step['environment'],
+                'cmd': 'bash -c \"cd {0} ; {1} \"'.format(
+                    workflow_workspace, escape_shell_arg(command)),
+                'max_restart_count': 0,
+                'env_vars': {},
+                'job_type': 'kubernetes',
+                'shared_file_system': True,
+            }
+            response, http_response = rjc_api_client.jobs.create_job(
+                job=job_spec).result()
+            job_id = str(response['job_id'])
             job_status = get_job_status(job_id)
-            publish_workflow_status(channel, workflow_uuid, 1)
-            sleep(1)
 
-        if job_status.status == 'succeeded':
-            publish_workflow_status(channel, workflow_uuid, 2)
-        else:
-            publish_workflow_status(channel, workflow_uuid, 3)
-        workflow_workspace_content = \
-            os.path.join(workflow_workspace, '*')
-        absolute_outputs_directory_path = os.path.join(
-            workflow_workspace, '..', OUTPUTS_DIRECTORY_RELATIVE_PATH)
-        log.info('Copying {source} to {dest}.'.format(
-            source=workflow_workspace_content,
-            dest=absolute_outputs_directory_path))
-        os.system('cp -R {source} {dest}'.format(
-            source=workflow_workspace_content,
-            dest=absolute_outputs_directory_path))
-        log.info('Workflow outputs copied to `/outputs` directory.')
+            while job_status.status not in ['succeeded', 'failed']:
+                job_status = get_job_status(job_id)
+                print('Got status:', job_status.status)
+                sleep(1)
+
+            if job_status.status == 'succeeded':
+                last_command = command
+            else:
+                break
+        if last_command == step['commands'][-1]:
+            last_step = step
+
+    if last_step == workflow_json['steps'][-1]:
+        publish_workflow_status(channel, workflow_uuid, 2)
+    else:
+        publish_workflow_status(channel, workflow_uuid, 3)
+
+    print('last step:', last_step)
+
+    workflow_workspace_content = \
+        os.path.join(workflow_workspace, '*')
+    absolute_outputs_directory_path = os.path.join(
+        workflow_workspace, '..', OUTPUTS_DIRECTORY_RELATIVE_PATH)
+    log.info('Copying {source} to {dest}.'.format(
+        source=workflow_workspace_content,
+        dest=absolute_outputs_directory_path))
+    os.system('cp -R {source} {dest}'.format(
+        source=workflow_workspace_content,
+        dest=absolute_outputs_directory_path))
+    log.info('Workflow outputs copied to `/outputs` directory.')
