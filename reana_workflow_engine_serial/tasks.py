@@ -22,16 +22,17 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 import logging
 import os
-import json
-import pika
 from time import sleep
+
+import pika
 
 from .api_client import create_openapi_client
 from .celeryapp import app
-from .config import (SHARED_VOLUME_PATH, OUTPUTS_DIRECTORY_RELATIVE_PATH,
-                     BROKER_USER, BROKER_PASS, BROKER_URL, BROKER_PORT)
+from .config import (BROKER_PASS, BROKER_PORT, BROKER_URL, BROKER_USER,
+                     OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH)
 
 log = logging.getLogger(__name__)
 outputs_dir_name = 'outputs'
@@ -81,14 +82,9 @@ def publish_workflow_status(channel, workflow_uuid, status, message=None):
 
 
 def escape_shell_arg(shell_arg):
-    """Escape shell argument shell_arg by placing it within
-    single-quotes.  Any single quotes found within the shell argument
-    string will be escaped.
-    @param shell_arg: The shell argument to be escaped.
-    @type shell_arg: string
-    @return: The single-quote-escaped value of the shell argument.
-    @rtype: string
-    @raise TypeError: if shell_arg is not a string.
+    """Escapes double quotes.
+
+    :param shell_arg: The shell argument to be escaped.
     """
     if type(shell_arg) is not str:
         msg = "ERROR: escape_shell_arg() expected string argument but " \
@@ -108,9 +104,17 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     channel = declare_job_status_queue()
 
     last_step = 'START'
-    for step in workflow_json['steps']:
+    for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
+            print('~~~~~~ Publishing step:{0}, cmd: {1},'
+                  ' total steps {2} to MQ'.
+                  format(step_number, command, len(workflow_json['steps'])))
+            publish_workflow_status(channel, workflow_uuid, 1,
+                                    {'current_step': step_number,
+                                     'cmd': command,
+                                     'total_steps':
+                                     len(workflow_json['steps'])})
             job_spec = {
                 'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
                                         'serial_experiment'),
@@ -121,6 +125,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 'env_vars': {},
                 'job_type': 'kubernetes',
                 'shared_file_system': True,
+                'workflow_uuid': str(workflow_uuid),
             }
             response, http_response = rjc_api_client.jobs.create_job(
                 job=job_spec).result()
@@ -129,7 +134,6 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
 
             while job_status.status not in ['succeeded', 'failed']:
                 job_status = get_job_status(job_id)
-                print('Got status:', job_status.status)
                 sleep(1)
 
             if job_status.status == 'succeeded':
@@ -140,11 +144,14 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             last_step = step
 
     if last_step == workflow_json['steps'][-1]:
+        publish_workflow_status(channel, workflow_uuid, 1,
+                                {'current_step': len(workflow_json['steps']),
+                                 'cmd': 'exit',
+                                 'total_steps':
+                                 len(workflow_json['steps'])})
         publish_workflow_status(channel, workflow_uuid, 2)
     else:
         publish_workflow_status(channel, workflow_uuid, 3)
-
-    print('last step:', last_step)
 
     workflow_workspace_content = \
         os.path.join(workflow_workspace, '*')
