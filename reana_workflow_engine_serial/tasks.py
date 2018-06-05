@@ -104,6 +104,11 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     channel = declare_job_status_queue()
 
     last_step = 'START'
+    total_commands = 0
+    for step in workflow_json['steps']:
+        total_commands += len(step['commands'])
+    current_command_idx = 0
+
     for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
@@ -112,7 +117,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                   format(step_number, command, len(workflow_json['steps'])))
             publish_workflow_status(channel, workflow_uuid, 1,
                                     {'current_step': step_number,
-                                     'cmd': command,
+                                     'current_command': command,
                                      'total_steps':
                                      len(workflow_json['steps'])})
             job_spec = {
@@ -137,20 +142,36 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 sleep(1)
 
             if job_status.status == 'succeeded':
+                current_command_idx += 1
                 last_command = command
+                if step == workflow_json['steps'][-1] and \
+                        command == step['commands'][-1]:
+                    publish_workflow_status(channel, workflow_uuid, 2,
+                                            {'current_step':
+                                             len(workflow_json['steps']),
+                                             'current_command': 'exit',
+                                             'current_command_idx':
+                                             current_command_idx,
+                                             'total_commands': total_commands,
+                                             'total_steps':
+                                             len(workflow_json['steps'])})
+                else:
+                    publish_workflow_status(channel, workflow_uuid, 1,
+                                            {'current_step':
+                                             len(workflow_json['steps']),
+                                             'current_command': command,
+                                             'current_command_idx':
+                                             current_command_idx,
+                                             'total_commands': total_commands,
+                                             'total_steps':
+                                             len(workflow_json['steps'])})
             else:
                 break
+
         if last_command == step['commands'][-1]:
             last_step = step
 
-    if last_step == workflow_json['steps'][-1]:
-        publish_workflow_status(channel, workflow_uuid, 1,
-                                {'current_step': len(workflow_json['steps']),
-                                 'cmd': 'exit',
-                                 'total_steps':
-                                 len(workflow_json['steps'])})
-        publish_workflow_status(channel, workflow_uuid, 2)
-    else:
+    if last_step != workflow_json['steps'][-1]:
         publish_workflow_status(channel, workflow_uuid, 3)
 
     workflow_workspace_content = \
