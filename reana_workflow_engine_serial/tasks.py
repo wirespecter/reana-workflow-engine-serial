@@ -22,19 +22,13 @@
 
 from __future__ import absolute_import, print_function
 
-import json
 import logging
 import os
 from time import sleep
 
-import pika
-from pika.exceptions import ChannelClosed
-
 from .api_client import create_openapi_client
 from .celeryapp import app
-from .config import (BROKER_PASS, BROKER_PORT, BROKER_URL, BROKER_USER,
-                     OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH,
-                     STATUS_QUEUE)
+from .config import OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH
 from .publisher import Publisher
 
 log = logging.getLogger(__name__)
@@ -71,9 +65,11 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                         toplevel=os.getcwd(), parameters=None):
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
-    # channel = create_channel()
+    workflow_workspace_content = \
+        os.path.join(workflow_workspace, '*')
     publisher = Publisher()
     publisher.connect()
+
     last_step = 'START'
     total_commands = 0
     for step in workflow_json['steps']:
@@ -126,23 +122,32 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             if job_status.status == 'succeeded':
                 succeeded_jobs = {"total": 1, "job_ids": [job_id]}
                 last_command = command
+                log.info('Caching result to ../archive/{}'.format(job_id))
+                cache_dir_path = os.path.join(
+                    workflow_workspace, '..', 'archive', job_id)
+                os.system('mkdir -p {}'.format(cache_dir_path))
+                os.system('cp -R {source} {dest}'.format(
+                    source=workflow_workspace,
+                    dest=cache_dir_path))
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
-                    publisher.publish_workflow_status(workflow_uuid, 2,
-                                                      message={
-                                                          "progress": {
-                                                              "succeeded":
-                                                              succeeded_jobs,
-                                                          }
-                                                      })
+                    workflow_status = 2
                 else:
-                    publisher.publish_workflow_status(workflow_uuid, 1,
-                                                      message={
-                                                          "progress": {
-                                                              "succeeded":
-                                                              succeeded_jobs,
-                                                          }
-                                                      })
+                    workflow_status = 1
+                publisher.publish_workflow_status(
+                    workflow_uuid, workflow_status,
+                    message={
+                        "progress": {
+                            "succeeded":
+                            succeeded_jobs,
+                        },
+                        'caching_info':
+                            {'job_spec': job_spec,
+                             'job_id': job_id,
+                             'workflow_workspace': workflow_workspace,
+                             'workflow_json': workflow_json,
+                             'result_path': cache_dir_path}
+                    })
             else:
                 break
 
@@ -160,8 +165,6 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                           })
     publisher.close()
 
-    workflow_workspace_content = \
-        os.path.join(workflow_workspace, '*')
     absolute_outputs_directory_path = os.path.join(
         workflow_workspace, '..', OUTPUTS_DIRECTORY_RELATIVE_PATH)
     log.info('Copying {source} to {dest}.'.format(
