@@ -61,7 +61,8 @@ def declare_job_status_queue():
     return channel
 
 
-def publish_workflow_status(channel, workflow_uuid, status, message=None):
+def publish_workflow_status(channel, workflow_uuid, status,
+                            message=None):
     """Update database workflow status.
 
     :param workflow_uuid: UUID which represents the workflow.
@@ -69,8 +70,8 @@ def publish_workflow_status(channel, workflow_uuid, status, message=None):
     :param status_message: String that represents the message related with the
        status, if there is any.
     """
-    log.info('Publishing Workflow: {0} Status: {1}'.format(workflow_uuid,
-                                                           status))
+    log.info('Publishing Workflow: {0} Status: {1}'.
+             format(workflow_uuid, status))
     channel.basic_publish(exchange='',
                           routing_key='jobs-status',
                           body=json.dumps({"workflow_uuid": workflow_uuid,
@@ -112,14 +113,6 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
-            print('~~~~~~ Publishing step:{0}, cmd: {1},'
-                  ' total steps {2} to MQ'.
-                  format(step_number, command, len(workflow_json['steps'])))
-            publish_workflow_status(channel, workflow_uuid, 1,
-                                    {'current_step': step_number,
-                                     'current_command': command,
-                                     'total_steps':
-                                     len(workflow_json['steps'])})
             job_spec = {
                 'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
                                         'serial_experiment'),
@@ -130,11 +123,19 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 'env_vars': {},
                 'job_type': 'kubernetes',
                 'shared_file_system': True,
-                'workflow_uuid': str(workflow_uuid),
             }
             response, http_response = rjc_api_client.jobs.create_job(
                 job=job_spec).result()
             job_id = str(response['job_id'])
+            print('~~~~~~ Publishing step:{0}, cmd: {1},'
+                  ' total steps {2} to MQ'.
+                  format(step_number, command, len(workflow_json['steps'])))
+            publish_workflow_status(channel, workflow_uuid, 1,
+                                    {'job_id': job_id,
+                                     'current_step': step_number,
+                                     'current_command': command,
+                                     'total_steps':
+                                     len(workflow_json['steps'])})
             job_status = get_job_status(job_id)
 
             while job_status.status not in ['succeeded', 'failed']:
