@@ -62,6 +62,7 @@ def declare_job_status_queue():
 
 
 def publish_workflow_status(channel, workflow_uuid, status,
+                            logs='',
                             message=None):
     """Update database workflow status.
 
@@ -75,6 +76,7 @@ def publish_workflow_status(channel, workflow_uuid, status,
     channel.basic_publish(exchange='',
                           routing_key='jobs-status',
                           body=json.dumps({"workflow_uuid": workflow_uuid,
+                                           "logs": logs,
                                            "status": status,
                                            "message": message}),
                           properties=pika.BasicProperties(
@@ -113,6 +115,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
+            current_command_idx += 1
             job_spec = {
                 'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
                                         'serial_experiment'),
@@ -131,11 +134,15 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                   ' total steps {2} to MQ'.
                   format(step_number, command, len(workflow_json['steps'])))
             publish_workflow_status(channel, workflow_uuid, 1,
-                                    {'job_id': job_id,
-                                     'current_step': step_number,
-                                     'current_command': command,
-                                     'total_steps':
-                                     len(workflow_json['steps'])})
+                                    logs='',
+                                    message={'job_id': job_id,
+                                             'current_step': step_number + 1,
+                                             'current_command': command,
+                                             'current_command_idx':
+                                             current_command_idx,
+                                             'total_commands': total_commands,
+                                             'total_steps':
+                                             len(workflow_json['steps'])})
             job_status = get_job_status(job_id)
 
             while job_status.status not in ['succeeded', 'failed']:
@@ -143,14 +150,13 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 sleep(1)
 
             if job_status.status == 'succeeded':
-                current_command_idx += 1
                 last_command = command
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
                     publish_workflow_status(channel, workflow_uuid, 2,
                                             {'current_step':
                                              len(workflow_json['steps']),
-                                             'current_command': 'exit',
+                                             'current_command': command,
                                              'current_command_idx':
                                              current_command_idx,
                                              'total_commands': total_commands,
