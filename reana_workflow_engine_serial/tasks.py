@@ -110,7 +110,10 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     total_commands = 0
     for step in workflow_json['steps']:
         total_commands += len(step['commands'])
+    planned_jobs = {"total": total_commands, "job_ids": []}
     current_command_idx = 0
+    succeeded_jobs = {"total": 0, "job_ids": []}
+    failed_jobs = {"total": 0, "job_ids": []}
 
     for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
@@ -133,16 +136,19 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
                   ' total steps {2} to MQ'.
                   format(step_number, command, len(workflow_json['steps'])))
+            submitted_jobs = {"total": 1, "job_ids": [job_id]}
+
             publish_workflow_status(channel, workflow_uuid, 1,
                                     logs='',
-                                    message={'job_id': job_id,
-                                             'current_step': step_number + 1,
-                                             'current_command': command,
-                                             'current_command_idx':
-                                             current_command_idx,
-                                             'total_commands': total_commands,
-                                             'total_steps':
-                                             len(workflow_json['steps'])})
+                                    message={
+                                        "progress": {
+                                            "planned": planned_jobs,
+                                            "submitted":
+                                            submitted_jobs,
+                                            "succeeded":
+                                            succeeded_jobs,
+                                            "failed": failed_jobs
+                                        }})
             job_status = get_job_status(job_id)
 
             while job_status.status not in ['succeeded', 'failed']:
@@ -150,28 +156,35 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 sleep(1)
 
             if job_status.status == 'succeeded':
+                succeeded_jobs["total"] += 1
+                succeeded_jobs["job_ids"].append(job_id)
+                submitted_jobs = {"total": 0, "job_ids": []}
                 last_command = command
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
                     publish_workflow_status(channel, workflow_uuid, 2,
-                                            {'current_step':
-                                             len(workflow_json['steps']),
-                                             'current_command': command,
-                                             'current_command_idx':
-                                             current_command_idx,
-                                             'total_commands': total_commands,
-                                             'total_steps':
-                                             len(workflow_json['steps'])})
+                                            message={
+                                                "progress": {
+                                                    "planned": planned_jobs,
+                                                    "submitted":
+                                                    submitted_jobs,
+                                                    "succeeded":
+                                                    succeeded_jobs,
+                                                    "failed": failed_jobs
+                                                }
+                                            })
                 else:
                     publish_workflow_status(channel, workflow_uuid, 1,
-                                            {'current_step':
-                                             len(workflow_json['steps']),
-                                             'current_command': command,
-                                             'current_command_idx':
-                                             current_command_idx,
-                                             'total_commands': total_commands,
-                                             'total_steps':
-                                             len(workflow_json['steps'])})
+                                            message={
+                                                "progress": {
+                                                    "planned": planned_jobs,
+                                                    "submitted":
+                                                    submitted_jobs,
+                                                    "succeeded":
+                                                    succeeded_jobs,
+                                                    "failed": failed_jobs
+                                                }
+                                            })
             else:
                 break
 
@@ -179,7 +192,18 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             last_step = step
 
     if last_step != workflow_json['steps'][-1]:
-        publish_workflow_status(channel, workflow_uuid, 3)
+        publish_workflow_status(channel, workflow_uuid, 3,
+                                message={
+                                    "progress": {
+                                        "planned": planned_jobs,
+                                        "submitted":
+                                        submitted_jobs,
+                                        "succeeded":
+                                        succeeded_jobs,
+                                        "failed": {"total": 1,
+                                                   "job_ids": [job_id]}
+                                    }
+                                })
 
     workflow_workspace_content = \
         os.path.join(workflow_workspace, '*')
