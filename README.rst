@@ -1,5 +1,5 @@
 ==============================
- REANA Workflow Engine Serial
+ REANA-Workflow-Engine-Serial
 ==============================
 
 .. image:: https://img.shields.io/travis/reanahub/reana-workflow-engine-serial.svg
@@ -24,7 +24,9 @@ About
 -----
 
 REANA-Workflow-Engine-Serial is a component of the `REANA
-<http://reanahub.io/>`_ reusable analysis platform.
+<http://www.reana.io/>`_ reusable and reproducible research data analysis
+platform. It takes care of instantiating, executing and managing simple
+sequential computational workflows.
 
 Features
 --------
@@ -40,4 +42,5 @@ Useful links
 - `source code <https://github.com/reanahub/reana-workflow-engine-serial>`_
 
 For more information about the REANA reusable analysis platform, please see the
-general `REANA documentation <http://reana.readthedocs.io/>`_.
+`REANA project <http://www.reana.io>`_ home page and the general `REANA
+documentation <http://reana.readthedocs.io/>`_ pages.
