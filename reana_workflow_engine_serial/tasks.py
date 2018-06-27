@@ -28,11 +28,14 @@ import os
 from time import sleep
 
 import pika
+from pika.exceptions import ChannelClosed
 
 from .api_client import create_openapi_client
 from .celeryapp import app
 from .config import (BROKER_PASS, BROKER_PORT, BROKER_URL, BROKER_USER,
-                     OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH)
+                     OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH,
+                     STATUS_QUEUE)
+from .publisher import Publisher
 
 log = logging.getLogger(__name__)
 outputs_dir_name = 'outputs'
@@ -46,42 +49,6 @@ def get_job_status(job_id):
     response, http_response = rjc_api_client.jobs.get_job(
         job_id=job_id).result()
     return response
-
-
-def declare_job_status_queue():
-    broker_credentials = pika.PlainCredentials(BROKER_USER,
-                                               BROKER_PASS)
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(BROKER_URL,
-                                  BROKER_PORT,
-                                  '/',
-                                  broker_credentials))
-    channel = connection.channel()
-    channel.queue_declare(queue='jobs-status')
-    return channel
-
-
-def publish_workflow_status(channel, workflow_uuid, status,
-                            logs='',
-                            message=None):
-    """Update database workflow status.
-
-    :param workflow_uuid: UUID which represents the workflow.
-    :param status: String that represents the analysis status.
-    :param status_message: String that represents the message related with the
-       status, if there is any.
-    """
-    log.info('Publishing Workflow: {0} Status: {1}'.
-             format(workflow_uuid, status))
-    channel.basic_publish(exchange='',
-                          routing_key='jobs-status',
-                          body=json.dumps({"workflow_uuid": workflow_uuid,
-                                           "logs": logs,
-                                           "status": status,
-                                           "message": message}),
-                          properties=pika.BasicProperties(
-                              delivery_mode=2,  # msg persistent
-                          ))
 
 
 def escape_shell_arg(shell_arg):
@@ -104,20 +71,20 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                         toplevel=os.getcwd(), parameters=None):
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
-    channel = declare_job_status_queue()
-
+    # channel = create_channel()
+    publisher = Publisher()
+    publisher.connect()
     last_step = 'START'
     total_commands = 0
     for step in workflow_json['steps']:
         total_commands += len(step['commands'])
-    planned_jobs = {"total": total_commands, "job_ids": []}
-    publish_workflow_status(channel, workflow_uuid, 1,
-                            logs='',
-                            message={
-                                "progress": {
-                                    "planned":
-                                    planned_jobs,
-                                }})
+    publisher.publish_workflow_status(workflow_uuid, 1,
+                                      message={
+                                          "progress": {
+                                              "planned":
+                                              {"total": total_commands,
+                                               "job_ids": []},
+                                          }})
     current_command_idx = 0
 
     for step_number, step in enumerate(workflow_json['steps']):
@@ -143,13 +110,13 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                   format(step_number, command, len(workflow_json['steps'])))
             submitted_jobs = {"total": 1, "job_ids": [job_id]}
 
-            publish_workflow_status(channel, workflow_uuid, 1,
-                                    logs='',
-                                    message={
-                                        "progress": {
-                                            "submitted":
-                                            submitted_jobs,
-                                        }})
+            publisher.publish_workflow_status(workflow_uuid, 1,
+                                              logs='',
+                                              message={
+                                                  "progress": {
+                                                      "submitted":
+                                                      submitted_jobs,
+                                                  }})
             job_status = get_job_status(job_id)
 
             while job_status.status not in ['succeeded', 'failed']:
@@ -161,21 +128,21 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 last_command = command
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
-                    publish_workflow_status(channel, workflow_uuid, 2,
-                                            message={
-                                                "progress": {
-                                                    "succeeded":
-                                                    succeeded_jobs,
-                                                }
-                                            })
+                    publisher.publish_workflow_status(workflow_uuid, 2,
+                                                      message={
+                                                          "progress": {
+                                                              "succeeded":
+                                                              succeeded_jobs,
+                                                          }
+                                                      })
                 else:
-                    publish_workflow_status(channel, workflow_uuid, 1,
-                                            message={
-                                                "progress": {
-                                                    "succeeded":
-                                                    succeeded_jobs,
-                                                }
-                                            })
+                    publisher.publish_workflow_status(workflow_uuid, 1,
+                                                      message={
+                                                          "progress": {
+                                                              "succeeded":
+                                                              succeeded_jobs,
+                                                          }
+                                                      })
             else:
                 break
 
@@ -183,13 +150,15 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             last_step = step
 
     if last_step != workflow_json['steps'][-1]:
-        publish_workflow_status(channel, workflow_uuid, 3,
-                                message={
-                                    "progress": {
-                                        "failed": {"total": 1,
-                                                   "job_ids": [job_id]}
-                                    }
-                                })
+        publisher.publish_workflow_status(workflow_uuid, 3,
+                                          message={
+                                              "progress": {
+                                                  "failed": {"total": 1,
+                                                             "job_ids":
+                                                             [job_id]}
+                                              }
+                                          })
+    publisher.close()
 
     workflow_workspace_content = \
         os.path.join(workflow_workspace, '*')

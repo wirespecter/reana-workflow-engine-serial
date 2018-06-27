@@ -60,3 +60,11 @@ CODE_DIRECTORY_RELATIVE_PATH = 'code'
 
 LOGS_DIRECTORY_RELATIVE_PATH = 'logs'
 """Represents the relative path to the logs directory."""
+
+STATUS_QUEUE = 'jobs-status'
+
+EXCHANGE = ''
+
+TYPE = ''
+
+ROUTING_KEY = 'jobs-status'
