@@ -22,6 +22,7 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 import logging
 import os
 from time import sleep
@@ -88,17 +89,28 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
         for command in step['commands']:
             current_command_idx += 1
             job_spec = {
-                'experiment': os.getenv('REANA_WORKFLOW_ENGINE_EXPERIMENT',
-                                        'serial_experiment'),
-                'docker_img': step['environment'],
-                'cmd': 'bash -c \"cd {0} ; {1} \"'.format(
+                "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
+                                        "serial_experiment"),
+                "docker_img": step["environment"],
+                "cmd": "bash -c \"cd {0} ; {1} \"".format(
                     workflow_workspace, escape_shell_arg(command)),
-                'max_restart_count': 0,
-                'env_vars': {},
-                'job_type': 'kubernetes',
-                'shared_file_system': True,
+                "max_restart_count": 0,
+                "env_vars": {},
+                "job_type": "kubernetes",
+                "shared_file_system": True,
             }
-            response, http_response = rjc_api_client.jobs.create_job(
+            result, http_response = rjc_api_client.job_cache.check_if_cached(
+                job_spec=json.dumps(job_spec),
+                workflow_json=json.dumps(step),
+                workflow_workspace=workflow_workspace).\
+                result()
+            if result['cached']:
+                os.system('cp -R {source} {dest}'.format(
+                    source=result['result_path'],
+                    dest=workflow_workspace))
+                print('~~~~~ Copied from cache')
+                continue
+            response, http_response = rjc_api_client.job.create_job(
                 job=job_spec).result()
             job_id = str(response['job_id'])
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
@@ -145,7 +157,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                             {'job_spec': job_spec,
                              'job_id': job_id,
                              'workflow_workspace': workflow_workspace,
-                             'workflow_json': workflow_json,
+                             'workflow_json': step,
                              'result_path': cache_dir_path}
                     })
             else:
