@@ -99,18 +99,40 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 "job_type": "kubernetes",
                 "shared_file_system": True,
             }
-            result, http_response = rjc_api_client.job_cache.check_if_cached(
-                job_spec=json.dumps(job_spec),
+            job_spec_copy = dict(job_spec)
+            clean_cmd = job_spec_copy['cmd'].split(';')[1]
+            job_spec_copy['cmd'] = clean_cmd
+            _, http_response = rjc_api_client.job_cache.check_if_cached(
+                job_spec=json.dumps(job_spec_copy),
                 workflow_json=json.dumps(step),
                 workflow_workspace=workflow_workspace).\
                 result()
+            result = http_response.json()
             if result['cached']:
                 os.system('cp -R {source} {dest}'.format(
-                    source=result['result_path'],
+                    source=os.path.join(result['result_path'],
+                                        'workspace', '*'),
                     dest=workflow_workspace))
                 print('~~~~~ Copied from cache')
+                last_step = step
+                job_id = result['job_id']
+                if step == workflow_json['steps'][-1] and \
+                        command == step['commands'][-1]:
+                    workflow_status = 2
+                else:
+                    workflow_status = 1
+                succeeded_jobs = {"total": 1, "job_ids": [job_id]}
+                publisher.publish_workflow_status(
+                    workflow_uuid, workflow_status,
+                    message={
+                        "progress": {
+                            "succeeded":
+                            succeeded_jobs,
+                            "cached":
+                            succeeded_jobs
+                        }})
                 continue
-            response, http_response = rjc_api_client.job.create_job(
+            response, http_response = rjc_api_client.jobs.create_job(
                 job=job_spec).result()
             job_id = str(response['job_id'])
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
