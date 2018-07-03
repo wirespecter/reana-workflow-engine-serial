@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function
 import json
 import logging
 import os
+from requests.exceptions import ConnectionError
 from time import sleep
 
 from .api_client import create_openapi_client
@@ -44,6 +45,27 @@ def get_job_status(job_id):
     response, http_response = rjc_api_client.jobs.get_job(
         job_id=job_id).result()
     return response
+
+
+def _check_if_cached(job_spec, step, workflow_workspace):
+    """Query job controller job cache."""
+    try:
+        return rjc_api_client.job_cache.check_if_cached(
+            job_spec=json.dumps(job_spec),
+            workflow_json=json.dumps(step),
+            workflow_workspace=workflow_workspace).\
+            result()
+    except ConnectionError:
+        _check_if_cached(job_spec, step, workflow_workspace)
+
+
+def _create_job(job):
+    """Call job controller to create a job."""
+    try:
+        return rjc_api_client.jobs.create_job(
+            job=job).result()
+    except ConnectionError:
+        _create_job(job)
 
 
 def escape_shell_arg(shell_arg):
@@ -102,11 +124,9 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             job_spec_copy = dict(job_spec)
             clean_cmd = job_spec_copy['cmd'].split(';')[1]
             job_spec_copy['cmd'] = clean_cmd
-            _, http_response = rjc_api_client.job_cache.check_if_cached(
-                job_spec=json.dumps(job_spec_copy),
-                workflow_json=json.dumps(step),
-                workflow_workspace=workflow_workspace).\
-                result()
+            _, http_response = _check_if_cached(job_spec_copy,
+                                                step,
+                                                workflow_workspace)
             result = http_response.json()
             if result['cached']:
                 os.system('cp -R {source} {dest}'.format(
@@ -132,8 +152,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                             succeeded_jobs
                         }})
                 continue
-            response, http_response = rjc_api_client.jobs.create_job(
-                job=job_spec).result()
+            response, http_response = _create_job(job=job_spec)
             job_id = str(response['job_id'])
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
                   ' total steps {2} to MQ'.
