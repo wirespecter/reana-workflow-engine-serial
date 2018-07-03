@@ -26,12 +26,18 @@ RUN apt update && \
     apt install nodejs -y && \
     pip install --upgrade pip
 
-ADD . /code
+COPY CHANGES.rst README.rst setup.py /code/
+COPY reana_workflow_engine_serial/version.py /code/reana_workflow_engine_serial/
 WORKDIR /code
+RUN pip install --no-cache-dir requirements-builder && \
+    requirements-builder -e all -l pypi setup.py | pip install --no-cache-dir -r /dev/stdin && \
+    pip uninstall -y requirements-builder
+
+COPY . /code
 
 # Debug off by default
 ARG DEBUG=false
-RUN if [ "${DEBUG}" = "true" ]; then pip install -r requirements-dev.txt; pip install -e .[all]; else pip install .[all]; fi;
+RUN if [ "${DEBUG}" = "true" ]; then pip install -r requirements-dev.txt; pip install -e .; else pip install .; fi;
 
 ARG QUEUE_ENV=default
 ENV QUEUE_ENV ${QUEUE_ENV}
