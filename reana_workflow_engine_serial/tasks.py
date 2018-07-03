@@ -27,12 +27,11 @@ import logging
 import os
 from time import sleep
 
-from requests.exceptions import ConnectionError
+from reana_workflow_commons.publisher import Publisher
 
 from .api_client import create_openapi_client
 from .celeryapp import app
 from .config import SHARED_VOLUME_PATH
-from .publisher import Publisher
 
 log = logging.getLogger(__name__)
 
