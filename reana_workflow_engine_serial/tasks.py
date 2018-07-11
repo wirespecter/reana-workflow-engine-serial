@@ -25,8 +25,9 @@ from __future__ import absolute_import, print_function
 import json
 import logging
 import os
-from requests.exceptions import ConnectionError
 from time import sleep
+
+from requests.exceptions import ConnectionError
 
 from .api_client import create_openapi_client
 from .celeryapp import app
@@ -120,9 +121,10 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 "env_vars": {},
                 "job_type": "kubernetes",
                 "shared_file_system": True,
+                "workflow_workspace": workflow_workspace
             }
             job_spec_copy = dict(job_spec)
-            clean_cmd = job_spec_copy['cmd'].split(';')[1]
+            clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
             _, http_response = _check_if_cached(job_spec_copy,
                                                 step,
