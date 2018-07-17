@@ -31,12 +31,10 @@ from requests.exceptions import ConnectionError
 
 from .api_client import create_openapi_client
 from .celeryapp import app
-from .config import OUTPUTS_DIRECTORY_RELATIVE_PATH, SHARED_VOLUME_PATH
+from .config import SHARED_VOLUME_PATH
 from .publisher import Publisher
 
 log = logging.getLogger(__name__)
-outputs_dir_name = 'outputs'
-known_dirs = ['inputs', 'logs', outputs_dir_name]
 
 rjc_api_client = create_openapi_client('reana-job-controller')
 
@@ -219,13 +217,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                               }
                                           })
     publisher.close()
-
-    absolute_outputs_directory_path = os.path.join(
-        workflow_workspace, '..', OUTPUTS_DIRECTORY_RELATIVE_PATH)
-    log.info('Copying {source} to {dest}.'.format(
-        source=workflow_workspace_content,
-        dest=absolute_outputs_directory_path))
-    os.system('cp -R {source} {dest}'.format(
-        source=workflow_workspace_content,
-        dest=absolute_outputs_directory_path))
-    log.info('Workflow outputs copied to `/outputs` directory.')
+    log.info('Workflow {workflow_uuid} finished. Files available '
+             'at {workflow_workspace}.'.format(
+                 workflow_uuid=workflow_uuid,
+                 workflow_workspace=workflow_workspace))

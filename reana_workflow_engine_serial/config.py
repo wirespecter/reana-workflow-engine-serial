@@ -24,7 +24,7 @@
 
 import os
 
-SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/reana/default')
+SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/reana')
 """Path to the mounted REANA shared volume."""
 
 BROKER_URL = os.getenv('RABBIT_MQ_URL',
@@ -48,18 +48,6 @@ COMPONENTS_DATA = {
         'reana_job_controller.json')
 }
 """REANA Workflow Controller address."""
-
-INPUTS_DIRECTORY_RELATIVE_PATH = 'inputs'
-"""Represents the relative path to the inputs directory (populated by RWC)"""
-
-OUTPUTS_DIRECTORY_RELATIVE_PATH = 'outputs'
-"""Represents the relative path to the outputs directory."""
-
-CODE_DIRECTORY_RELATIVE_PATH = 'code'
-"""Represents the relative path to the code directory (populated by RWC)"""
-
-LOGS_DIRECTORY_RELATIVE_PATH = 'logs'
-"""Represents the relative path to the logs directory."""
 
 STATUS_QUEUE = 'jobs-status'
 
