@@ -87,8 +87,6 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                         toplevel=os.getcwd(), parameters=None):
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
-    workflow_workspace_content = \
-        os.path.join(workflow_workspace, '*')
     publisher = Publisher()
     publisher.connect()
 
@@ -104,7 +102,6 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                                "job_ids": []},
                                           }})
     current_command_idx = 0
-
     for step_number, step in enumerate(workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
@@ -130,8 +127,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             result = http_response.json()
             if result['cached']:
                 os.system('cp -R {source} {dest}'.format(
-                    source=os.path.join(result['result_path'],
-                                        'workspace', '*'),
+                    source=os.path.join(result['result_path'], '*'),
                     dest=workflow_workspace))
                 print('~~~~~ Copied from cache')
                 last_step = step
@@ -180,7 +176,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                     workflow_workspace, '..', 'archive', job_id)
                 os.system('mkdir -p {}'.format(cache_dir_path))
                 os.system('cp -R {source} {dest}'.format(
-                    source=workflow_workspace,
+                    source=os.path.join(workflow_workspace, '*'),
                     dest=cache_dir_path))
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
