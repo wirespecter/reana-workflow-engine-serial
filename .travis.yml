@@ -32,9 +32,13 @@ python:
   - "3.6"
 
 matrix:
-  fast_finish: true
+  - fast_finish: true
+
+services:
+  - docker
 
 before_install:
+  - pip install -r requirements-dev.txt
   - travis_retry pip install --upgrade pip setuptools py
   - travis_retry pip install twine wheel coveralls
 
