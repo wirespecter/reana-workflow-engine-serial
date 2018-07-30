@@ -106,11 +106,13 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
         for command in step['commands']:
             current_command_idx += 1
             job_spec = {
+                "job_name": command,
                 "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
                                         "serial_experiment"),
                 "docker_img": step["environment"],
                 "cmd": "bash -c \"cd {0} ; {1} \"".format(
                     workflow_workspace, escape_shell_arg(command)),
+                'prettified_cmd': command,
                 "max_restart_count": 0,
                 "env_vars": {},
                 "job_type": "kubernetes",
