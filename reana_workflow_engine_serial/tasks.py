@@ -96,7 +96,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     publisher.publish_workflow_status(workflow_uuid, 1,
                                       message={
                                           "progress": {
-                                              "planned":
+                                              "total":
                                               {"total": total_commands,
                                                "job_ids": []},
                                           }})
@@ -143,7 +143,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                     workflow_uuid, workflow_status,
                     message={
                         "progress": {
-                            "succeeded":
+                            "finished":
                             succeeded_jobs,
                             "cached":
                             succeeded_jobs
@@ -154,14 +154,14 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
                   ' total steps {2} to MQ'.
                   format(step_number, command, len(workflow_json['steps'])))
-            submitted_jobs = {"total": 1, "job_ids": [job_id]}
+            running_jobs = {"total": 1, "job_ids": [job_id]}
 
             publisher.publish_workflow_status(workflow_uuid, 1,
                                               logs='',
                                               message={
                                                   "progress": {
-                                                      "submitted":
-                                                      submitted_jobs,
+                                                      "running":
+                                                      running_jobs,
                                                   }})
             job_status = get_job_status(job_id)
 
@@ -170,7 +170,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 sleep(1)
 
             if job_status.status == 'succeeded':
-                succeeded_jobs = {"total": 1, "job_ids": [job_id]}
+                finished_jobs = {"total": 1, "job_ids": [job_id]}
                 last_command = command
                 log.info('Caching result to ../archive/{}'.format(job_id))
                 cache_dir_path = os.path.join(
@@ -188,8 +188,8 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                     workflow_uuid, workflow_status,
                     message={
                         "progress": {
-                            "succeeded":
-                            succeeded_jobs,
+                            "finished":
+                            finished_jobs,
                         },
                         'caching_info':
                             {'job_spec': job_spec,
@@ -205,12 +205,12 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             last_step = step
 
     if last_step != workflow_json['steps'][-1]:
+        failed_jobs = {"total": 1, "job_ids": [job_id]}
         publisher.publish_workflow_status(workflow_uuid, 3,
                                           message={
                                               "progress": {
-                                                  "failed": {"total": 1,
-                                                             "job_ids":
-                                                             [job_id]}
+                                                  "failed":
+                                                  failed_jobs
                                               }
                                           })
     publisher.close()
