@@ -28,7 +28,7 @@ RUN apt update && \
 
 COPY CHANGES.rst README.rst setup.py /code/
 COPY reana_workflow_engine_serial/version.py /code/reana_workflow_engine_serial/
-RUN pip install -e git://github.com/reanahub/reana-workflow-commons.git@master#egg=reana-workflow-commons
+RUN pip install -e git://github.com/reanahub/reana-commons.git@master#egg=reana-commons
 WORKDIR /code
 RUN pip install --no-cache-dir requirements-builder && \
     requirements-builder -e all -l pypi setup.py | pip install --no-cache-dir -r /dev/stdin && \

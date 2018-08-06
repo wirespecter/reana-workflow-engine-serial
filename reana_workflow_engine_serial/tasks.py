@@ -27,7 +27,7 @@ import logging
 import os
 from time import sleep
 
-from reana_workflow_commons.publisher import Publisher
+from reana_commons.publisher import Publisher
 
 from .api_client import create_openapi_client
 from .celeryapp import app
