@@ -122,33 +122,35 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
-            _, http_response = _check_if_cached(job_spec_copy,
-                                                step,
-                                                workflow_workspace)
-            result = http_response.json()
-            if result['cached']:
-                os.system('cp -R {source} {dest}'.format(
-                    source=os.path.join(result['result_path'], '*'),
-                    dest=workflow_workspace))
-                print('~~~~~ Copied from cache')
-                last_step = step
-                job_id = result['job_id']
-                if step == workflow_json['steps'][-1] and \
-                        command == step['commands'][-1]:
-                    workflow_status = 2
-                else:
-                    workflow_status = 1
-                succeeded_jobs = {"total": 1, "job_ids": [job_id]}
-                publisher.publish_workflow_status(
-                    workflow_uuid, workflow_status,
-                    message={
-                        "progress": {
-                            "finished":
-                            succeeded_jobs,
-                            "cached":
-                            succeeded_jobs
-                        }})
-                continue
+            if 'CACHING' not in parameters or \
+                    parameters.get('CACHING') != 'false':
+                _, http_response = _check_if_cached(job_spec_copy,
+                                                    step,
+                                                    workflow_workspace)
+                result = http_response.json()
+                if result['cached']:
+                    os.system('cp -R {source} {dest}'.format(
+                        source=os.path.join(result['result_path'], '*'),
+                        dest=workflow_workspace))
+                    print('~~~~~ Copied from cache')
+                    last_step = step
+                    job_id = result['job_id']
+                    if step == workflow_json['steps'][-1] and \
+                            command == step['commands'][-1]:
+                        workflow_status = 2
+                    else:
+                        workflow_status = 1
+                    succeeded_jobs = {"total": 1, "job_ids": [job_id]}
+                    publisher.publish_workflow_status(
+                        workflow_uuid, workflow_status,
+                        message={
+                            "progress": {
+                                "finished":
+                                succeeded_jobs,
+                                "cached":
+                                succeeded_jobs
+                            }})
+                    continue
             response, http_response = _create_job(job=job_spec)
             job_id = str(response['job_id'])
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
