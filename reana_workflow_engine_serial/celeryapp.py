@@ -20,6 +20,8 @@
 # granted to it by virtue of its status as an Intergovernmental Organization or
 # submit itself to any jurisdiction.
 
+"""REANA Workflow Engine Serial celery app definition."""
+
 from __future__ import absolute_import
 
 from celery import Celery

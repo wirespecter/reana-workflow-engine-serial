@@ -20,6 +20,8 @@
 # granted to it by virtue of its status as an Intergovernmental Organization or
 # submit itself to any jurisdiction.
 
+"""REANA Workflow Engine Serial tasks."""
+
 from __future__ import absolute_import, print_function
 
 import json
@@ -84,6 +86,7 @@ def escape_shell_arg(shell_arg):
 def run_serial_workflow(workflow_uuid, workflow_workspace,
                         workflow=None, workflow_json=None,
                         toplevel=os.getcwd(), parameters=None):
+    """Run a serial workflow."""
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
     publisher = Publisher()
