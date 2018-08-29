@@ -30,6 +30,7 @@ import os
 from time import sleep
 
 from reana_commons.publisher import Publisher
+from reana_commons.serial import serial_load
 
 from .api_client import create_openapi_client
 from .celeryapp import app
@@ -85,7 +86,8 @@ def escape_shell_arg(shell_arg):
           ignore_result=True)
 def run_serial_workflow(workflow_uuid, workflow_workspace,
                         workflow=None, workflow_json=None,
-                        toplevel=os.getcwd(), parameters=None):
+                        toplevel=os.getcwd(), workflow_parameters=None,
+                        engine_parameters=None):
     """Run a serial workflow."""
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
@@ -103,8 +105,12 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                               {"total": total_commands,
                                                "job_ids": []},
                                           }})
+
+    expanded_workflow_json = serial_load(None, workflow_json,
+                                         workflow_parameters)
+
     current_command_idx = 0
-    for step_number, step in enumerate(workflow_json['steps']):
+    for step_number, step in enumerate(expanded_workflow_json['steps']):
         last_command = 'START'
         for command in step['commands']:
             current_command_idx += 1
@@ -125,8 +131,8 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
-            if 'CACHING' not in parameters or \
-                    parameters.get('CACHING') != 'false':
+            if 'CACHING' not in engine_parameters or \
+                    engine_parameters.get('CACHING') != 'false':
                 _, http_response = _check_if_cached(job_spec_copy,
                                                     step,
                                                     workflow_workspace)
