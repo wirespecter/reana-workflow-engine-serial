@@ -63,8 +63,8 @@ setup_requires = [
 ]
 
 install_requires = [
-    'bravado>=9.0.6',
-    'celery>=4.1.0',
+    'bravado>=9.0.6,<10.2',
+    'celery>=4.1.0,<4.3',
     'pika>=0.11.2',
     'reana-commons>=0.3.1,<0.4'
 ]
