@@ -131,8 +131,8 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
-            if 'CACHING' not in engine_parameters or \
-                    engine_parameters.get('CACHING') != 'false':
+            if 'CACHE' not in engine_parameters or \
+                    engine_parameters.get('CACHE').lower() != 'off':
                 _, http_response = _check_if_cached(job_spec_copy,
                                                     step,
                                                     workflow_workspace)

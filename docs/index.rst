@@ -9,7 +9,8 @@
    :numbered:
 
    introduction
-   overview
+   gettingstarted
+   userguide
    contributing
    changes
    license
