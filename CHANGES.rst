@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.3.1 (2018-09-07)
+--------------------------
+- Adds parameter passing to workflow steps.
+- Adds user guide and getting started sections to the documentation.
+
 Version 0.3.0 (2018-08-10)
 --------------------------
 
