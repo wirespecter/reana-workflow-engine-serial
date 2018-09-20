@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, print_function
 
+from distutils.dir_util import copy_tree
 import json
 import logging
 import os
@@ -184,17 +185,20 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 finished_jobs = {"total": 1, "job_ids": [job_id]}
                 last_command = command
                 log.info('Caching result to ../archive/{}'.format(job_id))
-                cache_dir_path = os.path.join(
-                    workflow_workspace, '..', 'archive', job_id)
-                os.system('mkdir -p {}'.format(cache_dir_path))
-                os.system('cp -R {source} {dest}'.format(
-                    source=os.path.join(workflow_workspace, '*'),
-                    dest=cache_dir_path))
+                log.info('workflow_workspace: {}'.format(workflow_workspace))
+                # Create the cache directory if it doesn't exist
+                cache_dir_path = os.path.abspath(os.path.join(
+                    workflow_workspace, os.pardir, 'archive', job_id))
+                log.info('cache_dir_path: {}'.format(cache_dir_path))
+                os.makedirs(cache_dir_path)
+                # Copy workspace contents to cache directory
+                copy_tree(workflow_workspace, cache_dir_path)
                 if step == workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
                     workflow_status = 2
                 else:
                     workflow_status = 1
+                # Publish workflow status with cache details
                 publisher.publish_workflow_status(
                     workflow_uuid, workflow_status,
                     message={
