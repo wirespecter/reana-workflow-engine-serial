@@ -1,8 +1,14 @@
 Changes
 =======
 
+Version 0.3.2 (2018-09-25)
+--------------------------
+
+- Modifies OS related commands for CephFS compatibility.
+
 Version 0.3.1 (2018-09-07)
 --------------------------
+
 - Adds parameter passing to workflow steps.
 - Adds user guide and getting started sections to the documentation.
 
