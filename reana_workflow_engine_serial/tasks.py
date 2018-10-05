@@ -16,44 +16,18 @@ import logging
 import os
 from time import sleep
 
+from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.publisher import Publisher
 from reana_commons.serial import serial_load
 
-from .api_client import create_openapi_client
 from .celeryapp import app
-from .config import SHARED_VOLUME_PATH
+from .config import COMPONENTS_DATA, SHARED_VOLUME_PATH
 
 log = logging.getLogger(__name__)
 
-rjc_api_client = create_openapi_client('reana-job-controller')
-
-
-def get_job_status(job_id):
-    """Get the result from a job launched in reana-job-controller."""
-    response, http_response = rjc_api_client.jobs.get_job(
-        job_id=job_id).result()
-    return response
-
-
-def _check_if_cached(job_spec, step, workflow_workspace):
-    """Query job controller job cache."""
-    try:
-        return rjc_api_client.job_cache.check_if_cached(
-            job_spec=json.dumps(job_spec),
-            workflow_json=json.dumps(step),
-            workflow_workspace=workflow_workspace).\
-            result()
-    except ConnectionError:
-        _check_if_cached(job_spec, step, workflow_workspace)
-
-
-def _create_job(job):
-    """Call job controller to create a job."""
-    try:
-        return rjc_api_client.jobs.create_job(
-            job=job).result()
-    except ConnectionError:
-        _create_job(job)
+rjc_api_client = JobControllerAPIClient(
+    'reana_workflow_engine_serial',
+    COMPONENTS_DATA['reana-job-controller'])
 
 
 def escape_shell_arg(shell_arg):
@@ -102,27 +76,24 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
         for command in step['commands']:
             current_command_idx += 1
             job_spec = {
-                "job_name": command,
                 "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
                                         "serial_experiment"),
-                "docker_img": step["environment"],
+                "image": step["environment"],
                 "cmd": "bash -c \"cd {0} ; {1} \"".format(
                     workflow_workspace, escape_shell_arg(command)),
-                'prettified_cmd': command,
-                "max_restart_count": 0,
-                "env_vars": {},
-                "job_type": "kubernetes",
-                "shared_file_system": True,
-                "workflow_workspace": workflow_workspace
+                "prettified_cmd": command,
+                "workflow_workspace": workflow_workspace,
+                "job_name": command,
             }
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
             if 'CACHE' not in engine_parameters or \
                     engine_parameters.get('CACHE').lower() != 'off':
-                _, http_response = _check_if_cached(job_spec_copy,
-                                                    step,
-                                                    workflow_workspace)
+                http_response = rjc_api_client.check_if_cached(
+                    job_spec_copy,
+                    step,
+                    workflow_workspace)
                 result = http_response.json()
                 if result['cached']:
                     os.system('cp -R {source} {dest}'.format(
@@ -147,7 +118,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                 succeeded_jobs
                             }})
                     continue
-            response, http_response = _create_job(job=job_spec)
+            response = rjc_api_client.submit(**job_spec)
             job_id = str(response['job_id'])
             print('~~~~~~ Publishing step:{0}, cmd: {1},'
                   ' total steps {2} to MQ'.
@@ -161,10 +132,10 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                                                       "running":
                                                       running_jobs,
                                                   }})
-            job_status = get_job_status(job_id)
+            job_status = rjc_api_client.check_status(job_id)
 
             while job_status.status not in ['succeeded', 'failed']:
-                job_status = get_job_status(job_id)
+                job_status = rjc_api_client.check_status(job_id)
                 sleep(1)
 
             if job_status.status == 'succeeded':

@@ -33,7 +33,7 @@ COMPONENTS_DATA = {
             port=os.getenv('JOB_CONTROLLER_SERVICE_PORT_HTTP', '5000')),
         'reana_job_controller.json')
 }
-"""REANA Workflow Controller address."""
+"""REANA Job Controller address."""
 
 STATUS_QUEUE = 'jobs-status'
 
