@@ -2,17 +2,20 @@
  REANA-Workflow-Engine-Serial
 ==============================
 
-.. image:: https://img.shields.io/pypi/pyversions/reana-server.svg
-   :target: https://pypi.org/pypi/reana-server
-
-.. image:: https://img.shields.io/travis/reanahub/reana-server.svg
-   :target: https://travis-ci.org/reanahub/reana-server
+.. image:: https://img.shields.io/travis/reanahub/reana-workflow-engine-serial.svg
+   :target: https://travis-ci.org/reanahub/reana-workflow-engine-serial
 
 .. image:: https://readthedocs.org/projects/docs/badge/?version=latest
-   :target: https://reana-server.readthedocs.io/en/latest/?badge=latest
+   :target: https://reana-workflow-engine-serial.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://img.shields.io/coveralls/reanahub/reana-workflow-engine-serial.svg
+   :target: https://coveralls.io/r/reanahub/reana-workflow-engine-serial
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :target: https://gitter.im/reanahub/reana?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+
+.. image:: https://img.shields.io/github/license/reanahub/reana-workflow-engine-serial.svg
+   :target: https://github.com/reanahub/reana-workflow-engine-serial/blob/master/LICENSE
 
 About
 -----
