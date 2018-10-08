@@ -21,13 +21,11 @@ from reana_commons.publisher import Publisher
 from reana_commons.serial import serial_load
 
 from .celeryapp import app
-from .config import COMPONENTS_DATA, SHARED_VOLUME_PATH
+from .config import SHARED_VOLUME_PATH
 
 log = logging.getLogger(__name__)
 
-rjc_api_client = JobControllerAPIClient(
-    'reana_workflow_engine_serial',
-    COMPONENTS_DATA['reana-job-controller'])
+rjc_api_client = JobControllerAPIClient('reana-job-controller')
 
 
 def escape_shell_arg(shell_arg):
