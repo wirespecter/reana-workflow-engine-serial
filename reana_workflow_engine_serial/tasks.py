@@ -17,7 +17,7 @@ import os
 from time import sleep
 
 from reana_commons.api_client import JobControllerAPIClient
-from reana_commons.publisher import Publisher
+from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 
 from .celeryapp import app
@@ -50,8 +50,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
     """Run a serial workflow."""
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
-    publisher = Publisher()
-    publisher.connect()
+    publisher = WorkflowStatusPublisher()
 
     last_step = 'START'
     total_commands = 0
