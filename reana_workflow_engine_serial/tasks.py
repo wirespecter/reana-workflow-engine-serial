@@ -10,14 +10,15 @@
 
 from __future__ import absolute_import, print_function
 
-from distutils.dir_util import copy_tree
 import json
 import logging
 import os
+from distutils.dir_util import copy_tree
 from time import sleep
 
 from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.publisher import WorkflowStatusPublisher
+from reana_commons.tasks import stop_workflow
 from reana_commons.serial import serial_load
 
 from .celeryapp import app

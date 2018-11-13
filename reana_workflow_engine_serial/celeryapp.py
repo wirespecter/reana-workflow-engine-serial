@@ -14,13 +14,14 @@ from celery import Celery
 
 from .config import BROKER
 
-app = Celery('tasks',
+app = Celery('tasks', backend='rpc://',
              broker=BROKER,
              include=['reana_workflow_engine_serial.tasks'])
 
 
-app.conf.update(CELERY_ACCEPT_CONTENT=['json'],
-                CELERY_TASK_SERIALIZER='json')
+app.conf.update(celery_accept_content=['json'],
+                celery_task_serializer=['json'],
+                broker_pool_limit=None)
 
 # ["worker", "-l", "info", "-Q", "${QUEUE_ENV}"]
 if __name__ == '__main__':

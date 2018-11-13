@@ -30,4 +30,4 @@ ARG QUEUE_ENV=default
 ENV QUEUE_ENV ${QUEUE_ENV}
 ENV PYTHONPATH=/workdir
 
-CMD celery -A reana_workflow_engine_serial.celeryapp worker -l info -Q ${QUEUE_ENV}
+CMD celery -A reana_workflow_engine_serial.celeryapp worker -l info -Q ${QUEUE_ENV} -Ofair
