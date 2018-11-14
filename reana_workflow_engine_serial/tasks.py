@@ -46,7 +46,7 @@ def escape_shell_arg(shell_arg):
 def run_serial_workflow(workflow_uuid, workflow_workspace,
                         workflow=None, workflow_json=None,
                         toplevel=os.getcwd(), workflow_parameters=None,
-                        operational_parameters={}):
+                        operational_options={}):
     """Run a serial workflow."""
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
@@ -85,8 +85,8 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd
-            if 'CACHE' not in operational_parameters or \
-                    operational_parameters.get('CACHE').lower() != 'off':
+            if 'CACHE' not in operational_options or \
+                    operational_options.get('CACHE').lower() != 'off':
                 http_response = rjc_api_client.check_if_cached(
                     job_spec_copy,
                     step,
@@ -99,7 +99,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                     print('~~~~~ Copied from cache')
                     last_step = step
                     job_id = result['job_id']
-                    if step == workflow_json['steps'][-1] and \
+                    if step == expanded_workflow_json['steps'][-1] and \
                             command == step['commands'][-1]:
                         workflow_status = 2
                     else:
@@ -147,7 +147,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 os.makedirs(cache_dir_path)
                 # Copy workspace contents to cache directory
                 copy_tree(workflow_workspace, cache_dir_path)
-                if step == workflow_json['steps'][-1] and \
+                if step == expanded_workflow_json['steps'][-1] and \
                         command == step['commands'][-1]:
                     workflow_status = 2
                 else:
@@ -173,7 +173,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
         if last_command == step['commands'][-1]:
             last_step = step
 
-    if last_step != workflow_json['steps'][-1]:
+    if last_step != expanded_workflow_json['steps'][-1]:
         failed_jobs = {"total": 1, "job_ids": [job_id]}
         publisher.publish_workflow_status(workflow_uuid, 3,
                                           message={
