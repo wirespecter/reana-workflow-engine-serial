@@ -28,6 +28,7 @@ RUN if [ "${DEBUG}" = "true" ]; then pip install -r requirements-dev.txt; pip in
 
 ARG QUEUE_ENV=default
 ENV QUEUE_ENV ${QUEUE_ENV}
+ARG CELERY_CONCURRENCY=2
+ENV CELERY_CONCURRENCY ${CELERY_CONCURRENCY}
 ENV PYTHONPATH=/workdir
-
-CMD celery -A reana_workflow_engine_serial.celeryapp worker -l info -Q ${QUEUE_ENV} -Ofair
+CMD celery -A reana_workflow_engine_serial.celeryapp worker -l info -Q ${QUEUE_ENV} --concurrency ${CELERY_CONCURRENCY} -Ofair
