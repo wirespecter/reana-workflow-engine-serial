@@ -51,7 +51,7 @@ setup_requires = [
 install_requires = [
     'bravado>=9.0.6,<10.2',
     'celery>=4.1.0,<4.3',
-    'reana-commons>=0.4.0,<0.5.0'
+    'reana-commons>=0.5.0.dev20181126,<0.6.0'
 ]
 
 packages = find_packages()
