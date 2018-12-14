@@ -51,6 +51,7 @@ setup_requires = [
 install_requires = [
     'bravado>=9.0.6,<10.2',
     'celery>=4.1.0,<4.3',
+    'click>=7,<8',
     'reana-commons>=0.5.0.dev20181126,<0.6.0'
 ]
 
@@ -75,6 +76,12 @@ setup(
     url='https://github.com/reanahub/reana-workflow-engine-serial',
     packages=['reana_workflow_engine_serial', ],
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'run-serial-workflow='
+            'reana_workflow_engine_serial.tasks:run_serial_workflow',
+        ]
+    },
     install_requires=install_requires,
     extras_require=extras_require,
     setup_requires=setup_requires,

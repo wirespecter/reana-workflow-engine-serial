@@ -10,6 +10,7 @@
 
 from __future__ import absolute_import, print_function
 
+import click
 import json
 import logging
 import os
@@ -18,10 +19,8 @@ from time import sleep
 
 from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.publisher import WorkflowStatusPublisher
-from reana_commons.tasks import stop_workflow
 from reana_commons.serial import serial_load
 
-from .celeryapp import app
 from .config import SHARED_VOLUME_PATH
 
 log = logging.getLogger(__name__)
@@ -41,14 +40,34 @@ def escape_shell_arg(shell_arg):
 
     return "%s" % shell_arg.replace('"', '\\"')
 
+def load_json(ctx, param, value):
+    """Callback function for click option"""
+    return json.loads(value)
 
-@app.task(name='tasks.run_serial_workflow',
-          ignore_result=True)
+@click.command()
+@click.option('--workflow-uuid',
+              required=True,
+              help='UUID of workflow to be run.')
+@click.option('--workflow-workspace',
+              required=True,
+              help='Name of workspace in which workflow should run.')
+@click.option('--workflow-json',
+              help='JSON representation of workflow object to be run.',
+              callback=load_json)
+@click.option('--workflow-parameters',
+              help='JSON representation of parameters received by'
+                   ' the workflow.',
+              callback=load_json)
+@click.option('--operational-options',
+              help='Options to be passed to the workflow engine'
+                   ' (e.g. caching).',
+              callback=load_json)
 def run_serial_workflow(workflow_uuid, workflow_workspace,
-                        workflow=None, workflow_json=None,
-                        toplevel=os.getcwd(), workflow_parameters=None,
-                        operational_options={}):
+                        workflow_json=None, workflow_parameters=None,
+                        operational_options=None):
     """Run a serial workflow."""
+    if not operational_options:
+        operational_options = {}
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
     publisher = WorkflowStatusPublisher()
@@ -75,7 +94,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
             current_command_idx += 1
             job_spec = {
                 "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
-                                        "serial_experiment"),
+                                        "default"),
                 "image": step["environment"],
                 "cmd": "bash -c \"cd {0} ; {1} \"".format(
                     workflow_workspace, escape_shell_arg(command)),
