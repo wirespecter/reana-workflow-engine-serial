@@ -105,6 +105,7 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 "prettified_cmd": command,
                 "workflow_workspace": workflow_workspace,
                 "job_name": command,
+                "cvmfs_mounts": ["cms", "atlas", "alice", "lhcb"]
             }
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
