@@ -22,7 +22,7 @@ from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 
-from .config import SHARED_VOLUME_PATH
+from .config import MOUNT_CVMFS, SHARED_VOLUME_PATH
 
 log = logging.getLogger(__name__)
 
@@ -105,8 +105,10 @@ def run_serial_workflow(workflow_uuid, workflow_workspace,
                 "prettified_cmd": command,
                 "workflow_workspace": workflow_workspace,
                 "job_name": command,
-                "cvmfs_mounts": ["cms", "atlas", "alice", "lhcb"]
+                "cvmfs_mounts": []
             }
+            if MOUNT_CVMFS:
+                job_spec["cvmfs_mounts"] = ["cms", "atlas", "alice", "lhcb"]
             job_spec_copy = dict(job_spec)
             clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
             job_spec_copy['cmd'] = clean_cmd

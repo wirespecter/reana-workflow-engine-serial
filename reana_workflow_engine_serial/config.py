@@ -26,10 +26,4 @@ BROKER = os.getenv('RABBIT_MQ', 'amqp://{0}:{1}@{2}//'.format(BROKER_USER,
                                                               BROKER_PASS,
                                                               BROKER_URL))
 
-STATUS_QUEUE = 'jobs-status'
-
-EXCHANGE = ''
-
-TYPE = ''
-
-ROUTING_KEY = 'jobs-status'
+MOUNT_CVMFS = os.getenv('REANA_MOUNT_CVMFS', False)
