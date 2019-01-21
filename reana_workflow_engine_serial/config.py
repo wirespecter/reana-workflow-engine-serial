@@ -10,7 +10,7 @@
 
 import os
 
-SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/reana')
+SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/var/reana')
 """Path to the mounted REANA shared volume."""
 
 BROKER_URL = os.getenv('RABBIT_MQ_URL',
