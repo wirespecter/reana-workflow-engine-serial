@@ -30,7 +30,7 @@ rjc_api_client = JobControllerAPIClient('reana-job-controller')
 
 
 def escape_shell_arg(shell_arg):
-    """Escapes double quotes.
+    """Escape double quotes.
 
     :param shell_arg: The shell argument to be escaped.
     """
@@ -43,7 +43,7 @@ def escape_shell_arg(shell_arg):
 
 
 def load_json(ctx, param, value):
-    """Callback function for click option"""
+    """Load json callback function."""
     value = str.encode(value[1:])
     return json.loads(base64.standard_b64decode(value).decode())
 
