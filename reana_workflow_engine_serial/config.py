@@ -8,6 +8,7 @@
 
 """REANA Workflow Engine Serial config."""
 
+import logging
 import os
 
 SHARED_VOLUME_PATH = os.getenv('SHARED_VOLUME_PATH', '/var/reana')
@@ -28,3 +29,6 @@ BROKER = os.getenv('RABBIT_MQ', 'amqp://{0}:{1}@{2}//'.format(BROKER_USER,
 
 MOUNT_CVMFS = True if os.getenv('REANA_MOUNT_CVMFS').lower() == 'true' \
     else False
+
+JOB_STATUS_POLLING_INTERVAL = os.getenv('POLLING_INTERVAL', 3)
+"""Polling interval in seconds for status of running jobs."""

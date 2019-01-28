@@ -10,42 +10,37 @@
 
 from __future__ import absolute_import, print_function
 
-import base64
+
 import json
 import logging
 import os
-from distutils.dir_util import copy_tree
-from time import sleep
 
 import click
 from reana_commons.api_client import JobControllerAPIClient
+from reana_commons.config import (REANA_ENGINE_LOG_LEVEL,
+                                  REANA_ENGINE_LOG_FORMAT)
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
+from reana_commons.utils import (build_caching_info_message,
+                                 build_progress_message)
 
-from .config import MOUNT_CVMFS, SHARED_VOLUME_PATH
-
-log = logging.getLogger(__name__)
+from .config import (MOUNT_CVMFS,
+                     SHARED_VOLUME_PATH)
+from .utils import (build_job_spec,
+                    check_cache,
+                    copy_workspace_from_cache,
+                    copy_workspace_to_cache,
+                    escape_shell_arg,
+                    load_json,
+                    poll_job_status,
+                    publish_cache_copy,
+                    publish_job_submission,
+                    publish_job_success,
+                    publish_workflow_failure,
+                    publish_workflow_start,
+                    sanitize_command)
 
 rjc_api_client = JobControllerAPIClient('reana-job-controller')
-
-
-def escape_shell_arg(shell_arg):
-    """Escape double quotes.
-
-    :param shell_arg: The shell argument to be escaped.
-    """
-    if type(shell_arg) is not str:
-        msg = "ERROR: escape_shell_arg() expected string argument but " \
-              "got '%s' of type '%s'." % (repr(shell_arg), type(shell_arg))
-        raise TypeError(msg)
-
-    return "%s" % shell_arg.replace('"', '\\"')
-
-
-def load_json(ctx, param, value):
-    """Load json callback function."""
-    value = str.encode(value[1:])
-    return json.loads(base64.standard_b64decode(value).decode())
 
 
 @click.command()
@@ -66,151 +61,169 @@ def load_json(ctx, param, value):
               help='Options to be passed to the workflow engine'
                    ' (e.g. caching).',
               callback=load_json)
-def run_serial_workflow(workflow_uuid, workflow_workspace,
-                        workflow_json=None, workflow_parameters=None,
+def run_serial_workflow(workflow_uuid,
+                        workflow_workspace,
+                        workflow_json=None,
+                        workflow_parameters=None,
                         operational_options=None):
     """Run a serial workflow."""
+    try:
+        workflow_workspace, publisher, cache_enabled, = initialize(
+            workflow_uuid,
+            workflow_workspace,
+            operational_options)
+
+        run(workflow_json,
+            workflow_parameters,
+            operational_options,
+            workflow_uuid,
+            workflow_workspace,
+            publisher,
+            cache_enabled)
+
+    except Exception as e:
+        logging.debug(str(e))
+        if publisher:
+            publish_workflow_failure(None,
+                                     workflow_uuid,
+                                     publisher)
+        else:
+            logging.error('Workflow {workflow_uuid} failed but status '
+                          'could not be published.'.format(
+                          workflow_uuid=workflow_uuid))
+
+    finally:
+        cleanup(workflow_uuid,
+                workflow_workspace,
+                publisher)
+
+def initialize(workflow_uuid, workflow_workspace, operational_options):
+    """Initialize engine."""
+    # configure the logger
+    logging.basicConfig(level=REANA_ENGINE_LOG_LEVEL,
+                        format=REANA_ENGINE_LOG_FORMAT)
+
+    # set cache on or off
     if not operational_options:
         operational_options = {}
+    if 'CACHE' not in operational_options or \
+        operational_options.get('CACHE', '').lower() != 'off':
+            cache_enabled = True
+    else:
+        cache_enabled = False
+
+    # build workspace path
     workflow_workspace = '{0}/{1}'.format(SHARED_VOLUME_PATH,
                                           workflow_workspace)
+
+    # create a MQ publisher
     publisher = WorkflowStatusPublisher()
 
-    last_step = 'START'
-    total_commands = 0
-    for step in workflow_json['steps']:
-        total_commands += len(step['commands'])
-    publisher.publish_workflow_status(workflow_uuid, 1,
-                                      message={
-                                          "progress": {
-                                              "total":
-                                              {"total": total_commands,
-                                               "job_ids": []},
-                                          }})
+    return workflow_workspace, publisher, cache_enabled
 
-    expanded_workflow_json = serial_load(None, workflow_json,
+
+def run(workflow_json,
+        workflow_parameters,
+        operational_options,
+        workflow_uuid,
+        workflow_workspace,
+        publisher,
+        cache_enabled):
+    """Run a serial workflow."""
+    expanded_workflow_json = serial_load(None,
+                                         workflow_json,
                                          workflow_parameters)
 
-    current_command_idx = 0
+    publish_workflow_start(workflow_json,
+                           workflow_uuid,
+                           publisher)
+
     for step_number, step in enumerate(expanded_workflow_json['steps']):
-        last_command = 'START'
-        for command in step['commands']:
-            current_command_idx += 1
-            job_spec = {
-                "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
-                                        "default"),
-                "image": step["environment"],
-                "cmd": "bash -c \"cd {0} ; {1} \"".format(
-                    workflow_workspace, escape_shell_arg(command)),
-                "prettified_cmd": command,
-                "workflow_workspace": workflow_workspace,
-                "job_name": command,
-                "cvmfs_mounts": []
-            }
-            if MOUNT_CVMFS:
-                job_spec["cvmfs_mounts"] = ["cms", "atlas", "alice", "lhcb"]
-            job_spec_copy = dict(job_spec)
-            clean_cmd = ';'.join(job_spec_copy['cmd'].split(';')[1:])
-            job_spec_copy['cmd'] = clean_cmd
-            if 'CACHE' not in operational_options or \
-                    operational_options.get('CACHE').lower() != 'off':
-                http_response = rjc_api_client.check_if_cached(
-                    job_spec_copy,
-                    step,
+        run_step(step_number,
+                 step,
+                 workflow_workspace,
+                 cache_enabled,
+                 expanded_workflow_json,
+                 workflow_json,
+                 publisher,
+                 workflow_uuid)
+
+
+def run_step(step_number,
+             step,
+             workflow_workspace,
+             cache_enabled,
+             expanded_workflow_json,
+             workflow_json,
+             publisher,
+             workflow_uuid):
+    """Run a step of a serial workflow."""
+    for command in step['commands']:
+        job_spec = build_job_spec(step['environment'],
+                                  command,
+                                  workflow_workspace,
+                                  MOUNT_CVMFS)
+        job_spec_copy = dict(job_spec)
+        job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
+
+        if cache_enabled:
+            cached_info = check_cache(rjc_api_client,
+                                      job_spec_copy,
+                                      step,
+                                      workflow_workspace)
+            if cached_info.get('result_path'):
+                copy_workspace_from_cache(cached_info['result_path'],
+                                            workflow_workspace)
+                publish_cache_copy(cached_info['job_id'],
+                                   step,
+                                   expanded_workflow_json,
+                                   command,
+                                   publisher,
+                                   workflow_uuid)
+                continue
+
+        response = rjc_api_client.submit(**job_spec)
+        job_id = str(response['job_id'])
+        publish_job_submission(step_number,
+                               command,
+                               workflow_json,
+                               job_id,
+                               publisher,
+                               workflow_uuid)
+
+        job_status = poll_job_status(rjc_api_client,
+                                     job_id)
+
+        if job_status.status == 'succeeded':
+            cache_dir_path = None
+            if cache_enabled:
+                cache_dir_path = copy_workspace_to_cache(
+                    job_id,
                     workflow_workspace)
-                result = http_response.json()
-                if result['cached']:
-                    os.system('cp -R {source} {dest}'.format(
-                        source=os.path.join(result['result_path'], '*'),
-                        dest=workflow_workspace))
-                    print('~~~~~ Copied from cache')
-                    last_step = step
-                    job_id = result['job_id']
-                    if step == expanded_workflow_json['steps'][-1] and \
-                            command == step['commands'][-1]:
-                        workflow_status = 2
-                    else:
-                        workflow_status = 1
-                    succeeded_jobs = {"total": 1, "job_ids": [job_id]}
-                    publisher.publish_workflow_status(
-                        workflow_uuid, workflow_status,
-                        message={
-                            "progress": {
-                                "finished":
-                                succeeded_jobs,
-                                "cached":
-                                succeeded_jobs
-                            }})
-                    continue
-            response = rjc_api_client.submit(**job_spec)
-            job_id = str(response['job_id'])
-            print('~~~~~~ Publishing step:{0}, cmd: {1},'
-                  ' total steps {2} to MQ'.
-                  format(step_number, command, len(workflow_json['steps'])))
-            running_jobs = {"total": 1, "job_ids": [job_id]}
 
-            publisher.publish_workflow_status(workflow_uuid, 1,
-                                              logs='',
-                                              message={
-                                                  "progress": {
-                                                      "running":
-                                                      running_jobs,
-                                                  }})
-            job_status = rjc_api_client.check_status(job_id)
+            publish_job_success(job_id,
+                                job_spec,
+                                workflow_workspace,
+                                expanded_workflow_json,
+                                step,
+                                command,
+                                publisher,
+                                workflow_uuid,
+                                cache_dir_path=cache_dir_path)
+        else:
+            publish_workflow_failure(job_id,
+                                     workflow_uuid,
+                                     publisher)
+            return
 
-            while job_status.status not in ['succeeded', 'failed']:
-                job_status = rjc_api_client.check_status(job_id)
-                sleep(1)
 
-            if job_status.status == 'succeeded':
-                finished_jobs = {"total": 1, "job_ids": [job_id]}
-                last_command = command
-                log.info('Caching result to ../archive/{}'.format(job_id))
-                log.info('workflow_workspace: {}'.format(workflow_workspace))
-                # Create the cache directory if it doesn't exist
-                cache_dir_path = os.path.abspath(os.path.join(
-                    workflow_workspace, os.pardir, 'archive', job_id))
-                log.info('cache_dir_path: {}'.format(cache_dir_path))
-                os.makedirs(cache_dir_path)
-                # Copy workspace contents to cache directory
-                copy_tree(workflow_workspace, cache_dir_path)
-                if step == expanded_workflow_json['steps'][-1] and \
-                        command == step['commands'][-1]:
-                    workflow_status = 2
-                else:
-                    workflow_status = 1
-                # Publish workflow status with cache details
-                publisher.publish_workflow_status(
-                    workflow_uuid, workflow_status,
-                    message={
-                        "progress": {
-                            "finished":
-                            finished_jobs,
-                        },
-                        'caching_info':
-                            {'job_spec': job_spec,
-                             'job_id': job_id,
-                             'workflow_workspace': workflow_workspace,
-                             'workflow_json': step,
-                             'result_path': cache_dir_path}
-                    })
-            else:
-                break
-
-        if last_command == step['commands'][-1]:
-            last_step = step
-
-    if last_step != expanded_workflow_json['steps'][-1]:
-        failed_jobs = {"total": 1, "job_ids": [job_id]}
-        publisher.publish_workflow_status(workflow_uuid, 3,
-                                          message={
-                                              "progress": {
-                                                  "failed":
-                                                  failed_jobs
-                                              }
-                                          })
+def cleanup(workflow_uuid,
+            workflow_workspace,
+            publisher):
+    """Do cleanup tasks before exiting."""
+    logging.info(
+        'Workflow {workflow_uuid} finished. Files available '
+        'at {workflow_workspace}.'.format(
+            workflow_uuid=workflow_uuid,
+            workflow_workspace=workflow_workspace))
     publisher.close()
-    log.info('Workflow {workflow_uuid} finished. Files available '
-             'at {workflow_workspace}.'.format(
-                 workflow_uuid=workflow_uuid,
-                 workflow_workspace=workflow_workspace))
