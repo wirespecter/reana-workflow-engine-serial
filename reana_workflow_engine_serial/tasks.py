@@ -171,9 +171,11 @@ def run_step(step_number,
                                       job_spec_copy,
                                       step,
                                       workflow_workspace)
-            if cached_info.get('result_path'):
+            if (cached_info.get('result_path') and
+                    os.path.exists(cached_info.get('result_path')) and
+                    os.listdir(cached_info.get('result_path'))):
                 copy_workspace_from_cache(cached_info['result_path'],
-                                            workflow_workspace)
+                                          workflow_workspace)
                 publish_cache_copy(cached_info['job_id'],
                                    step,
                                    expanded_workflow_json,
