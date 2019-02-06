@@ -24,8 +24,7 @@ from reana_commons.serial import serial_load
 from reana_commons.utils import (build_caching_info_message,
                                  build_progress_message)
 
-from .config import (MOUNT_CVMFS,
-                     SHARED_VOLUME_PATH)
+from .config import SHARED_VOLUME_PATH
 from .utils import (build_job_spec,
                     check_cache,
                     copy_workspace_from_cache,
@@ -161,8 +160,7 @@ def run_step(step_number,
     for command in step['commands']:
         job_spec = build_job_spec(step['environment'],
                                   command,
-                                  workflow_workspace,
-                                  MOUNT_CVMFS)
+                                  workflow_workspace)
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 

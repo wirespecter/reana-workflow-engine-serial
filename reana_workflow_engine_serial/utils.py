@@ -18,7 +18,7 @@ from time import sleep
 from reana_commons.utils import (build_progress_message,
                                  build_caching_info_message)
 
-from .config import JOB_STATUS_POLLING_INTERVAL
+from .config import JOB_STATUS_POLLING_INTERVAL, MOUNT_CVMFS
 
 
 def sanitize_command(command):
@@ -45,7 +45,7 @@ def escape_shell_arg(shell_arg):
     return "%s" % shell_arg.replace('"', '\\"')
 
 
-def build_job_spec(image, command, workflow_workspace, mount_cvmfs):
+def build_job_spec(image, command, workflow_workspace):
     """Build job specification to passed to RJC."""
     job_spec = {
             "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
@@ -56,10 +56,8 @@ def build_job_spec(image, command, workflow_workspace, mount_cvmfs):
             "prettified_cmd": command,
             "workflow_workspace": workflow_workspace,
             "job_name": command,
-            "cvmfs_mounts": []
+            "cvmfs_mounts": MOUNT_CVMFS
     }
-    if mount_cvmfs:
-        job_spec["cvmfs_mounts"] = ["cms", "atlas", "alice", "lhcb"]
     return job_spec
 
 
