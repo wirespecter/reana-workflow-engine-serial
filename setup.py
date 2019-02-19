@@ -52,7 +52,7 @@ install_requires = [
     'bravado>=9.0.6,<10.2',
     'celery>=4.1.0,<4.3',
     'click>=7,<8',
-    'reana-commons>=0.5.0.dev20190213,<0.6.0'
+    'reana-commons[kubernetes]>=0.5.0.dev20190220,<0.6.0'
 ]
 
 packages = find_packages()
