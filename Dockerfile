@@ -4,12 +4,11 @@
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-FROM python:3.6
+FROM python:3.6-slim
 
 ENV TERM=xterm
 RUN apt update && \
-    apt install -y vim emacs-nox && \
-    apt install nodejs -y && \
+    apt install -y vim-tiny && \
     pip install --upgrade pip
 
 COPY CHANGES.rst README.rst setup.py /code/
