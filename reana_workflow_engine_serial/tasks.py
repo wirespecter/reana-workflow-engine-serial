@@ -160,7 +160,8 @@ def run_step(step_number,
     for command in step['commands']:
         job_spec = build_job_spec(step['environment'],
                                   command,
-                                  workflow_workspace)
+                                  workflow_workspace,
+                                  workflow_uuid)
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 

@@ -45,7 +45,7 @@ def escape_shell_arg(shell_arg):
     return "%s" % shell_arg.replace('"', '\\"')
 
 
-def build_job_spec(image, command, workflow_workspace):
+def build_job_spec(image, command, workflow_workspace, workflow_uuid):
     """Build job specification to passed to RJC."""
     job_spec = {
             "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
@@ -56,7 +56,8 @@ def build_job_spec(image, command, workflow_workspace):
             "prettified_cmd": command,
             "workflow_workspace": workflow_workspace,
             "job_name": command,
-            "cvmfs_mounts": MOUNT_CVMFS
+            "cvmfs_mounts": MOUNT_CVMFS,
+            "workflow_uuid": workflow_uuid
     }
     return job_spec
 
@@ -140,7 +141,6 @@ def publish_job_submission(step_number,
             step_number,
             command,
             len(workflow_json['steps']))
-        
     )
     running_jobs = {"total": 1, "job_ids": [job_id]}
 
