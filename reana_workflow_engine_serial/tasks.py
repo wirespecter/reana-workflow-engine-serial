@@ -17,8 +17,8 @@ import os
 
 import click
 from reana_commons.api_client import JobControllerAPIClient
-from reana_commons.config import (REANA_ENGINE_LOG_LEVEL,
-                                  REANA_ENGINE_LOG_FORMAT)
+from reana_commons.config import (REANA_LOG_LEVEL,
+                                  REANA_LOG_FORMAT)
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 from reana_commons.utils import (build_caching_info_message,
@@ -99,8 +99,8 @@ def run_serial_workflow(workflow_uuid,
 def initialize(workflow_uuid, workflow_workspace, operational_options):
     """Initialize engine."""
     # configure the logger
-    logging.basicConfig(level=REANA_ENGINE_LOG_LEVEL,
-                        format=REANA_ENGINE_LOG_FORMAT)
+    logging.basicConfig(level=REANA_LOG_LEVEL,
+                        format=REANA_LOG_FORMAT)
 
     # set cache on or off
     if not operational_options:
