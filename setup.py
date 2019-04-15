@@ -27,7 +27,7 @@ tests_require = [
     'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
-    'pytest>=2.8.0,<3.0.0'
+    'pytest>=3.8.0'
 ]
 
 extras_require = {
@@ -50,7 +50,7 @@ setup_requires = [
 
 install_requires = [
     'celery>=4.1.0,<4.3',
-    'click>=7,<8',
+    'click>=7',
     'reana-commons[kubernetes]>=0.5.0.dev20190408,<0.6.0'
 ]
 
