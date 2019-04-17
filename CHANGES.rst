@@ -1,6 +1,16 @@
 Changes
 =======
 
+Version 0.5.0 (2019-04-23)
+--------------------------
+
+- Makes workflow engine independent of Celery so that independent workflow
+  instances are created on demand for each user.
+- Replaces ``api_client`` module with centralised one from REANA-Commons.
+- Introduces CVMFS mounts in job specifications.
+- Makes docker image slimmer by using ``python:3.6-slim``.
+- Centralises log level and log format configuration.
+
 Version 0.4.0 (2018-11-06)
 --------------------------
 
@@ -26,4 +36,3 @@ Version 0.3.0 (2018-08-10)
 - Executes serial workflows.
 - Tracks progress of workflow runs.
 - Caches job results by default.
-

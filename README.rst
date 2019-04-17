@@ -5,7 +5,7 @@
 .. image:: https://img.shields.io/travis/reanahub/reana-workflow-engine-serial.svg
    :target: https://travis-ci.org/reanahub/reana-workflow-engine-serial
 
-.. image:: https://readthedocs.org/projects/docs/badge/?version=latest
+.. image:: https://readthedocs.org/projects/reana-workflow-engine-serial/badge/?version=latest
    :target: https://reana-workflow-engine-serial.readthedocs.io/en/latest/?badge=latest
 
 .. image:: https://img.shields.io/coveralls/reanahub/reana-workflow-engine-serial.svg
@@ -35,7 +35,6 @@ Useful links
 ------------
 
 - `documentation <https://reana-workflow-engine-serial.readthedocs.io/>`_
-- `overview <https://reana-workflow-engine-serial.readthedocs.io/en/latest/overview.html>`_
 - `releases <https://github.com/reanahub/reana-workflow-engine-serial/releases>`_
 - `known issues <https://github.com/reanahub/reana-workflow-engine-serial/issues>`_
 - `source code <https://github.com/reanahub/reana-workflow-engine-serial>`_

@@ -51,7 +51,7 @@ setup_requires = [
 install_requires = [
     'celery>=4.1.0,<4.3',
     'click>=7',
-    'reana-commons[kubernetes]>=0.5.0.dev20190408,<0.6.0'
+    'reana-commons>=0.5.0,<0.6.0'
 ]
 
 packages = find_packages()
