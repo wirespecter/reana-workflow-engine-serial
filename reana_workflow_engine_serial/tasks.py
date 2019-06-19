@@ -22,7 +22,8 @@ from reana_commons.config import (REANA_LOG_LEVEL,
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 from reana_commons.utils import (build_caching_info_message,
-                                 build_progress_message)
+                                 build_progress_message,
+                                 check_connection_to_job_controller)
 
 from .config import SHARED_VOLUME_PATH
 from .utils import (build_job_spec,
@@ -67,6 +68,7 @@ def run_serial_workflow(workflow_uuid,
                         operational_options=None):
     """Run a serial workflow."""
     try:
+        check_connection_to_job_controller()
         workflow_workspace, publisher, cache_enabled, = initialize(
             workflow_uuid,
             workflow_workspace,
