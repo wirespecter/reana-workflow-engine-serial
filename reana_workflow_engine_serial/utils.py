@@ -9,14 +9,14 @@
 """REANA-Workflow-Engine-Serial utilities."""
 
 import base64
-
 import json
 import logging
 import os
 from distutils.dir_util import copy_tree
 from time import sleep
-from reana_commons.utils import (build_progress_message,
-                                 build_caching_info_message)
+
+from reana_commons.utils import (build_caching_info_message,
+                                 build_progress_message)
 
 from .config import JOB_STATUS_POLLING_INTERVAL, MOUNT_CVMFS
 

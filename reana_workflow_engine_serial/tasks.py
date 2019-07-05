@@ -10,15 +10,13 @@
 
 from __future__ import absolute_import, print_function
 
-
 import json
 import logging
 import os
 
 import click
 from reana_commons.api_client import JobControllerAPIClient
-from reana_commons.config import (REANA_LOG_LEVEL,
-                                  REANA_LOG_FORMAT)
+from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 from reana_commons.utils import (build_caching_info_message,
@@ -26,18 +24,11 @@ from reana_commons.utils import (build_caching_info_message,
                                  check_connection_to_job_controller)
 
 from .config import SHARED_VOLUME_PATH
-from .utils import (build_job_spec,
-                    check_cache,
-                    copy_workspace_from_cache,
-                    copy_workspace_to_cache,
-                    escape_shell_arg,
-                    load_json,
-                    poll_job_status,
-                    publish_cache_copy,
-                    publish_job_submission,
-                    publish_job_success,
-                    publish_workflow_failure,
-                    publish_workflow_start,
+from .utils import (build_job_spec, check_cache, copy_workspace_from_cache,
+                    copy_workspace_to_cache, escape_shell_arg, load_json,
+                    poll_job_status, publish_cache_copy,
+                    publish_job_submission, publish_job_success,
+                    publish_workflow_failure, publish_workflow_start,
                     sanitize_command)
 
 rjc_api_client = JobControllerAPIClient('reana-job-controller')
@@ -91,12 +82,13 @@ def run_serial_workflow(workflow_uuid,
         else:
             logging.error('Workflow {workflow_uuid} failed but status '
                           'could not be published.'.format(
-                          workflow_uuid=workflow_uuid))
+                              workflow_uuid=workflow_uuid))
 
     finally:
         cleanup(workflow_uuid,
                 workflow_workspace,
                 publisher)
+
 
 def initialize(workflow_uuid, workflow_workspace, operational_options):
     """Initialize engine."""
@@ -108,7 +100,7 @@ def initialize(workflow_uuid, workflow_workspace, operational_options):
     if not operational_options:
         operational_options = {}
     if 'CACHE' not in operational_options or \
-        operational_options.get('CACHE', '').lower() != 'off':
+            operational_options.get('CACHE', '').lower() != 'off':
             cache_enabled = True
     else:
         cache_enabled = False
