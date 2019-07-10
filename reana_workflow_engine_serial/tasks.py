@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import, print_function
 
-import json
 import logging
 import os
 
@@ -19,17 +18,14 @@ from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
-from reana_commons.utils import (build_caching_info_message,
-                                 build_progress_message,
-                                 check_connection_to_job_controller)
+from reana_commons.utils import check_connection_to_job_controller
 
-from .config import SHARED_VOLUME_PATH
+from .config import CACHE_ENABLED, SHARED_VOLUME_PATH
 from .utils import (build_job_spec, check_cache, copy_workspace_from_cache,
-                    copy_workspace_to_cache, escape_shell_arg, load_json,
-                    poll_job_status, publish_cache_copy,
-                    publish_job_submission, publish_job_success,
-                    publish_workflow_failure, publish_workflow_start,
-                    sanitize_command)
+                    copy_workspace_to_cache, load_json, poll_job_status,
+                    publish_cache_copy, publish_job_submission,
+                    publish_job_success, publish_workflow_failure,
+                    publish_workflow_start, sanitize_command)
 
 rjc_api_client = JobControllerAPIClient('reana-job-controller')
 
@@ -99,9 +95,12 @@ def initialize(workflow_uuid, workflow_workspace, operational_options):
     # set cache on or off
     if not operational_options:
         operational_options = {}
-    if 'CACHE' not in operational_options or \
-            operational_options.get('CACHE', '').lower() != 'off':
+    if CACHE_ENABLED:
+        if 'CACHE' not in operational_options or \
+                operational_options.get('CACHE', '').lower() != 'off':
             cache_enabled = True
+        else:
+            cache_enabled = False
     else:
         cache_enabled = False
 
@@ -152,12 +151,13 @@ def run_step(step_number,
              workflow_uuid):
     """Run a step of a serial workflow."""
     for command in step['commands']:
-        job_spec = build_job_spec(name=step['name'],
-                                  image=step['environment'],
-                                  backend=step['backend'],
-                                  command=command,
-                                  workflow_workspace=workflow_workspace,
-                                  workflow_uuid=workflow_uuid)
+        job_spec = build_job_spec(
+            job_name=step.get('name', ''),
+            image=step['environment'],
+            compute_backend=step.get('compute_backend', ''),
+            command=command,
+            workflow_workspace=workflow_workspace,
+            workflow_uuid=workflow_uuid)
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 

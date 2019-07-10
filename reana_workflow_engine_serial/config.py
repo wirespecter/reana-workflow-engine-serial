@@ -31,3 +31,6 @@ MOUNT_CVMFS = os.getenv('REANA_MOUNT_CVMFS', 'false')
 
 JOB_STATUS_POLLING_INTERVAL = os.getenv('POLLING_INTERVAL', 3)
 """Polling interval in seconds for status of running jobs."""
+
+CACHE_ENABLED = False
+"""Determines if jobs caching is enabled."""
