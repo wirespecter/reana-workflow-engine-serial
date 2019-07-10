@@ -152,10 +152,12 @@ def run_step(step_number,
              workflow_uuid):
     """Run a step of a serial workflow."""
     for command in step['commands']:
-        job_spec = build_job_spec(step['environment'],
-                                  command,
-                                  workflow_workspace,
-                                  workflow_uuid)
+        job_spec = build_job_spec(name=step['name'],
+                                  image=step['environment'],
+                                  backend=step['backend'],
+                                  command=command,
+                                  workflow_workspace=workflow_workspace,
+                                  workflow_uuid=workflow_uuid)
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 
