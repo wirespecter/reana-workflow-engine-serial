@@ -157,7 +157,8 @@ def run_step(step_number,
             compute_backend=step.get('compute_backend', ''),
             command=command,
             workflow_workspace=workflow_workspace,
-            workflow_uuid=workflow_uuid)
+            workflow_uuid=workflow_uuid,
+            kerberos=step.get('kerberos', False))
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 

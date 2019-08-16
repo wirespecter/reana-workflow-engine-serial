@@ -46,7 +46,7 @@ def escape_shell_arg(shell_arg):
 
 
 def build_job_spec(job_name, image, compute_backend, command,
-                   workflow_workspace, workflow_uuid):
+                   workflow_workspace, workflow_uuid, kerberos):
     """Build job specification to passed to RJC."""
     job_spec = {
             "experiment": os.getenv("REANA_WORKFLOW_ENGINE_EXPERIMENT",
@@ -59,7 +59,8 @@ def build_job_spec(job_name, image, compute_backend, command,
             "workflow_workspace": workflow_workspace,
             "job_name": job_name,
             "cvmfs_mounts": MOUNT_CVMFS,
-            "workflow_uuid": workflow_uuid
+            "workflow_uuid": workflow_uuid,
+            "kerberos": kerberos,
     }
     return job_spec
 
