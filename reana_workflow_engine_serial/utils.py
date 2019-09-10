@@ -228,3 +228,23 @@ def publish_workflow_failure(job_id,
                                           build_progress_message(
                                               failed=failed_jobs)
                                       })
+
+
+def adjust_workflow_steps(workflow_json, target_step):
+    """Adjust the workflow until the given target step."""
+    if target_step:
+        # Target step is expected to be either int or step name (str)
+        try:
+            step_number = int(target_step)
+        except ValueError:
+            # Get the step names from the workflow
+            input_steps = list()
+            for step in workflow_json['steps']:
+                input_steps.append(step['name'])
+
+            step_number = input_steps.index(target_step)
+
+        # Remove all subsequent steps
+        workflow_json['steps'] = workflow_json['steps'][:step_number+1]
+
+    return workflow_json

@@ -21,11 +21,12 @@ from reana_commons.serial import serial_load
 from reana_commons.utils import check_connection_to_job_controller
 
 from .config import CACHE_ENABLED, SHARED_VOLUME_PATH
-from .utils import (build_job_spec, check_cache, copy_workspace_from_cache,
-                    copy_workspace_to_cache, load_json, poll_job_status,
-                    publish_cache_copy, publish_job_submission,
-                    publish_job_success, publish_workflow_failure,
-                    publish_workflow_start, sanitize_command)
+from .utils import (adjust_workflow_steps, build_job_spec, check_cache,
+                    copy_workspace_from_cache, copy_workspace_to_cache,
+                    load_json, poll_job_status, publish_cache_copy,
+                    publish_job_submission, publish_job_success,
+                    publish_workflow_failure, publish_workflow_start,
+                    sanitize_command)
 
 rjc_api_client = JobControllerAPIClient('reana-job-controller')
 
@@ -122,6 +123,10 @@ def run(workflow_json,
         publisher,
         cache_enabled):
     """Run a serial workflow."""
+    operational_options = operational_options if operational_options else {}
+    workflow_json = adjust_workflow_steps(workflow_json,
+                                          operational_options.get('target'))
+
     expanded_workflow_json = serial_load(None,
                                          workflow_json,
                                          workflow_parameters)
@@ -219,9 +224,6 @@ def cleanup(workflow_uuid,
             workflow_workspace,
             publisher):
     """Do cleanup tasks before exiting."""
-    logging.info(
-        'Workflow {workflow_uuid} finished. Files available '
-        'at {workflow_workspace}.'.format(
-            workflow_uuid=workflow_uuid,
-            workflow_workspace=workflow_workspace))
+    logging.info(f'Workflow {workflow_uuid} finished. Files available '
+                 f'at {workflow_workspace}.')
     publisher.close()
