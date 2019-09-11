@@ -230,21 +230,28 @@ def publish_workflow_failure(job_id,
                                       })
 
 
-def adjust_workflow_steps(workflow_json, target_step):
-    """Adjust the workflow until the given target step."""
+def get_targeted_workflow_steps(workflow_json, target_step):
+    """Build the workflow steps until the given target step.
+
+    :param workflow_json: Dictionary representing the serial workflow spec.
+    :type dict:
+    :param target_step: Step until which the workflow will be run identified
+        by name.
+    :type str:
+    :returns: A list of the steps which should be run.
+    :rtype: dict
+    """
+    selected_steps = []
     if target_step:
-        # Target step is expected to be either int or step name (str)
-        try:
-            step_number = int(target_step)
-        except ValueError:
-            # Get the step names from the workflow
-            input_steps = list()
-            for step in workflow_json['steps']:
-                input_steps.append(step['name'])
-
-            step_number = input_steps.index(target_step)
-
-        # Remove all subsequent steps
-        workflow_json['steps'] = workflow_json['steps'][:step_number+1]
-
-    return workflow_json
+        target_step_matched = False
+        for step in workflow_json['steps']:
+            selected_steps.append(step)
+            if step['name'] == target_step:
+                target_step_matched = True
+                break
+        if not target_step_matched:
+            logging.info(f'The target step {target_step} was not found, '
+                         f'running the complete workflow.')
+    else:
+        selected_steps = workflow_json['steps']
+    return selected_steps

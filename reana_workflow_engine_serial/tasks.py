@@ -21,8 +21,8 @@ from reana_commons.serial import serial_load
 from reana_commons.utils import check_connection_to_job_controller
 
 from .config import CACHE_ENABLED, SHARED_VOLUME_PATH
-from .utils import (adjust_workflow_steps, build_job_spec, check_cache,
-                    copy_workspace_from_cache, copy_workspace_to_cache,
+from .utils import (build_job_spec, check_cache, copy_workspace_from_cache,
+                    copy_workspace_to_cache, get_targeted_workflow_steps,
                     load_json, poll_job_status, publish_cache_copy,
                     publish_job_submission, publish_job_success,
                     publish_workflow_failure, publish_workflow_start,
@@ -123,19 +123,19 @@ def run(workflow_json,
         publisher,
         cache_enabled):
     """Run a serial workflow."""
-    operational_options = operational_options if operational_options else {}
-    workflow_json = adjust_workflow_steps(workflow_json,
-                                          operational_options.get('target'))
-
+    operational_options = operational_options or {}
     expanded_workflow_json = serial_load(None,
                                          workflow_json,
                                          workflow_parameters)
-
+    steps_to_run = get_targeted_workflow_steps(
+        expanded_workflow_json,
+        operational_options.get('TARGET'))
+    workflow_json['steps'] = expanded_workflow_json['steps'] = steps_to_run
     publish_workflow_start(workflow_json,
                            workflow_uuid,
                            publisher)
 
-    for step_number, step in enumerate(expanded_workflow_json['steps']):
+    for step_number, step in enumerate(steps_to_run):
         run_step(step_number,
                  step,
                  workflow_workspace,
