@@ -1,6 +1,15 @@
 Changes
 =======
 
+Version 0.6.0 (2019-12-20)
+--------------------------
+
+- Allows to specify compute backend (HTCondor, Kubernetes or Slurm) and
+  Kerberos authentication requirement for Serial workflow jobs.
+- Allows partial workflow execution until step specified by the user.
+- Moves workflow engine to the same Kubernetes pod with the REANA-Job-Controller
+  (sidecar pattern).
+
 Version 0.5.0 (2019-04-23)
 --------------------------
 
