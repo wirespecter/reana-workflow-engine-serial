@@ -136,14 +136,16 @@ def run(workflow_json,
                            publisher)
 
     for step_number, step in enumerate(steps_to_run):
-        run_step(step_number,
-                 step,
-                 workflow_workspace,
-                 cache_enabled,
-                 expanded_workflow_json,
-                 workflow_json,
-                 publisher,
-                 workflow_uuid)
+        status = run_step(step_number,
+                          step,
+                          workflow_workspace,
+                          cache_enabled,
+                          expanded_workflow_json,
+                          workflow_json,
+                          publisher,
+                          workflow_uuid)
+        if status != 'succeeded':
+            break
 
 
 def run_step(step_number,
@@ -196,7 +198,6 @@ def run_step(step_number,
 
         job_status = poll_job_status(rjc_api_client,
                                      job_id)
-
         if job_status.status == 'succeeded':
             cache_dir_path = None
             if cache_enabled:
@@ -217,7 +218,8 @@ def run_step(step_number,
             publish_workflow_failure(job_id,
                                      workflow_uuid,
                                      publisher)
-            return
+            return job_status.status
+    return job_status.status
 
 
 def cleanup(workflow_uuid,
