@@ -129,9 +129,10 @@ def run(workflow_json,
                                          workflow_parameters)
     steps_to_run = get_targeted_workflow_steps(
         expanded_workflow_json,
-        operational_options.get('TARGET'))
+        operational_options.get('TARGET', None),
+        operational_options.get('FROM', None))
     workflow_json['steps'] = expanded_workflow_json['steps'] = steps_to_run
-    publish_workflow_start(workflow_json,
+    publish_workflow_start(steps_to_run,
                            workflow_uuid,
                            publisher)
 

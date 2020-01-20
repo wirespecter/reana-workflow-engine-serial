@@ -203,7 +203,7 @@ def publish_workflow_start(workflow_json,
                            publisher):
     """Publish to MQ the start of the workflow."""
     total_commands = 0
-    for step in workflow_json['steps']:
+    for step in workflow_json:
         total_commands += len(step['commands'])
     total_jobs = {"total": total_commands, "job_ids": []}
     publisher.publish_workflow_status(workflow_uuid, 1,
@@ -228,28 +228,35 @@ def publish_workflow_failure(job_id,
                                       })
 
 
-def get_targeted_workflow_steps(workflow_json, target_step):
+def get_targeted_workflow_steps(workflow_json, target_step=None,
+                                from_step=None):
     """Build the workflow steps until the given target step.
 
     :param workflow_json: Dictionary representing the serial workflow spec.
     :type dict:
     :param target_step: Step until which the workflow will be run identified
         by name.
+    :param from_step: Step from which the workflow will be run identified
+        by name.
     :type str:
     :returns: A list of the steps which should be run.
     :rtype: dict
     """
-    selected_steps = []
+    from_step_idx = 0
+    target_step_idx = len(workflow_json['steps'])
+    if from_step:
+        from_step_idx = \
+            next((i for (i, step) in enumerate(workflow_json['steps'])
+                 if step["name"].lower() == from_step.lower()), 0)
     if target_step:
-        target_step_matched = False
-        for step in workflow_json['steps']:
-            selected_steps.append(step)
-            if step['name'] == target_step:
-                target_step_matched = True
-                break
-        if not target_step_matched:
-            logging.info(f'The target step {target_step} was not found, '
-                         f'running the complete workflow.')
+        target_step_idx = \
+            next((i + 1 for (i, step) in enumerate(workflow_json['steps'])
+                 if step["name"].lower() == target_step.lower()),
+                 target_step_idx)
+    if from_step_idx <= target_step_idx:
+        return workflow_json['steps'][from_step_idx:target_step_idx]
     else:
-        selected_steps = workflow_json['steps']
-    return selected_steps
+        logging.error(
+            'From step has to be the same as target or before target step. '
+            'Executing full workflow.')
+    return workflow_json['steps']
