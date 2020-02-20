@@ -70,8 +70,11 @@ def run_serial_workflow(workflow_uuid,
             publisher,
             cache_enabled)
 
+        status = 'finished'
+
     except Exception as e:
         logging.debug(str(e))
+        status = 'failed'
         if publisher:
             publish_workflow_failure(None,
                                      workflow_uuid,
@@ -84,7 +87,8 @@ def run_serial_workflow(workflow_uuid,
     finally:
         cleanup(workflow_uuid,
                 workflow_workspace,
-                publisher)
+                publisher,
+                status)
 
 
 def initialize(workflow_uuid, workflow_workspace, operational_options):
@@ -225,8 +229,9 @@ def run_step(step_number,
 
 def cleanup(workflow_uuid,
             workflow_workspace,
-            publisher):
+            publisher,
+            status):
     """Do cleanup tasks before exiting."""
-    logging.info(f'Workflow {workflow_uuid} finished. Files available '
+    logging.info(f'Workflow {workflow_uuid} {status}. Files available '
                  f'at {workflow_workspace}.')
     publisher.close()
