@@ -170,7 +170,8 @@ def run_step(step_number,
             command=command,
             workflow_workspace=workflow_workspace,
             workflow_uuid=workflow_uuid,
-            kerberos=step.get('kerberos', False))
+            kerberos=step.get('kerberos', False),
+            unpacked_image=step.get('unpacked_image', False))
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 
@@ -191,7 +192,6 @@ def run_step(step_number,
                                    publisher,
                                    workflow_uuid)
                 continue
-
         response = rjc_api_client.submit(**job_spec)
         job_id = str(response['job_id'])
         publish_job_submission(step_number,
