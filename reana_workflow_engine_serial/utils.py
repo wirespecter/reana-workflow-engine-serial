@@ -47,7 +47,7 @@ def escape_shell_arg(shell_arg):
 
 def build_job_spec(job_name, image, compute_backend, command,
                    workflow_workspace, workflow_uuid, kerberos,
-                   unpacked_image, kubernetes_uid):
+                   unpacked_image, kubernetes_uid, proxy):
     """Build job specification to passed to RJC."""
     job_spec = {
         "image": image,
@@ -62,6 +62,7 @@ def build_job_spec(job_name, image, compute_backend, command,
         "kerberos": kerberos,
         "unpacked_img": unpacked_image,
         "kubernetes_uid": kubernetes_uid,
+        "proxy": proxy,
     }
     return job_spec
 
