@@ -15,12 +15,13 @@ import os
 
 import click
 from reana_commons.api_client import JobControllerAPIClient
-from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL
+from reana_commons.config import (REANA_LOG_FORMAT, REANA_LOG_LEVEL,
+                                  SHARED_VOLUME_PATH)
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
 from reana_commons.utils import check_connection_to_job_controller
 
-from .config import CACHE_ENABLED, SHARED_VOLUME_PATH
+from .config import CACHE_ENABLED
 from .utils import (build_job_spec, check_cache, copy_workspace_from_cache,
                     copy_workspace_to_cache, get_targeted_workflow_steps,
                     load_json, poll_job_status, publish_cache_copy,
