@@ -172,7 +172,8 @@ def run_step(step_number,
             workflow_workspace=workflow_workspace,
             workflow_uuid=workflow_uuid,
             kerberos=step.get('kerberos', False),
-            unpacked_image=step.get('unpacked_image', False))
+            unpacked_image=step.get('unpacked_image', False),
+            kubernetes_uid=step.get('kubernetes_uid', None))
         job_spec_copy = dict(job_spec)
         job_spec_copy['cmd'] = sanitize_command(job_spec_copy['cmd'])
 
