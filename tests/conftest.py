@@ -15,15 +15,19 @@ import pytest
 def multiple_named_steps_workflow(serial_workflow):
     """Multiple named steps workflow."""
     num_steps = 4
-    step_name_prefix = 'step_'
+    step_name_prefix = "step_"
     named_steps = []
-    serial_workflow_spec = \
-        serial_workflow['reana_specification']['workflow']['specification']
+    serial_workflow_spec = serial_workflow["reana_specification"]["workflow"][
+        "specification"
+    ]
 
     for step_number in range(num_steps):
         named_steps.append(
-            {'name': f'{step_name_prefix}{step_number}',
-             'environment': 'busybox',
-             'commands': [f'echo "Step number {step_number}."']})
-    serial_workflow_spec['steps'] = named_steps
+            {
+                "name": f"{step_name_prefix}{step_number}",
+                "environment": "busybox",
+                "commands": [f'echo "Step number {step_number}."'],
+            }
+        )
+    serial_workflow_spec["steps"] = named_steps
     return num_steps, step_name_prefix, serial_workflow_spec
