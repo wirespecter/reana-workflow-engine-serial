@@ -17,6 +17,9 @@
 .. image:: https://img.shields.io/github/license/reanahub/reana-workflow-engine-serial.svg
    :target: https://github.com/reanahub/reana-workflow-engine-serial/blob/master/LICENSE
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+
 About
 -----
 
