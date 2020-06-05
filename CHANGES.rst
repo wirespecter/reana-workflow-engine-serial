@@ -1,6 +1,15 @@
 Changes
 =======
 
+Version master (UNRELEASED)
+---------------------------
+
+- Allows to execute workflow from specified step.
+- Allows specifying unpacked Docker images as workflow step requirement.
+- Adds ``kubernetes_uid`` field.
+- Adds VOMS proxy support as a new authentication method.
+- Add Black formatter support.
+
 Version 0.6.0 (2019-12-20)
 --------------------------
 
