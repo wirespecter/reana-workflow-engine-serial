@@ -4,6 +4,7 @@ Changes
 Version master (UNRELEASED)
 ---------------------------
 
+- Pins all Python dependencies allowing to easily rebuild component images at later times.
 - Allows to execute workflow from specified step.
 - Allows specifying unpacked Docker images as workflow step requirement.
 - Adds ``kubernetes_uid`` field.
