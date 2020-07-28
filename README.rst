@@ -1,6 +1,6 @@
-==============================
- REANA-Workflow-Engine-Serial
-==============================
+############################
+REANA-Workflow-Engine-Serial
+############################
 
 .. image:: https://img.shields.io/travis/reanahub/reana-workflow-engine-serial.svg
    :target: https://travis-ci.org/reanahub/reana-workflow-engine-serial
@@ -21,7 +21,7 @@
    :target: https://github.com/psf/black
 
 About
------
+=====
 
 REANA-Workflow-Engine-Serial is a component of the `REANA
 <http://www.reana.io/>`_ reusable and reproducible research data analysis
@@ -29,19 +29,27 @@ platform. It takes care of instantiating, executing and managing simple
 sequential computational workflows.
 
 Features
---------
+========
 
 - Run sequential workflows consisting of Bash commands.
 - Cache workflow steps by default to shorten computation time.
 
+Usage
+=====
+
+The detailed information on how to install and use REANA can be found in
+`docs.reana.io <https://docs.reana.io>`_.
+
+
 Useful links
-------------
+============
 
-- `documentation <https://reana-workflow-engine-serial.readthedocs.io/>`_
-- `releases <https://github.com/reanahub/reana-workflow-engine-serial/releases>`_
-- `known issues <https://github.com/reanahub/reana-workflow-engine-serial/issues>`_
-- `source code <https://github.com/reanahub/reana-workflow-engine-serial>`_
+- `REANA project home page <http://www.reana.io/>`_
+- `REANA user documentation <https://docs.reana.io>`_
+- `REANA user support forum <https://forum.reana.io>`_
 
-For more information about the REANA reusable analysis platform, please see the
-`REANA project <http://www.reana.io>`_ home page and the general `REANA
-documentation <http://reana.readthedocs.io/>`_ pages.
+- `REANA-Workflow-Engine-Serial releases <https://reana-workflow-engine-serial.readthedocs.io/en/latest#changes>`_
+- `REANA-Workflow-Engine-Serial docker images <https://hub.docker.com/r/reanahub/reana-workflow-engine-serial>`_
+- `REANA-Workflow-Engine-Serial developer documentation <https://reana-workflow-engine-serial.readthedocs.io/>`_
+- `REANA-Workflow-Engine-Serial known issues <https://github.com/reanahub/reana-workflow-engine-serial/issues>`_
+- `REANA-Workflow-Engine-Serial source code <https://github.com/reanahub/reana-workflow-engine-serial>`_

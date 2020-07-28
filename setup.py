@@ -24,7 +24,7 @@ tests_require = [
 
 extras_require = {
     "debug": ["wdb", "ipdb", "Flask-DebugToolbar",],
-    "docs": ["Sphinx>=1.4.4", "sphinx-rtd-theme>=0.1.9",],
+    "docs": ["Sphinx>=1.5.1", "sphinx-rtd-theme>=0.1.9",],
     "tests": tests_require,
 }
 
