@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-amqp==2.6.0               # via kombu
+amqp==2.6.1               # via kombu
 attrs==19.3.0             # via jsonschema
 bravado-core==5.17.0      # via bravado
 bravado==10.3.2           # via reana-commons
@@ -13,7 +13,6 @@ chardet==3.0.4            # via requests
 checksumdir==1.1.9        # via reana-commons
 click==7.1.2              # via reana-commons, reana-workflow-engine-serial (setup.py)
 idna==2.10                # via jsonschema, requests
-importlib-metadata==1.7.0  # via jsonschema, kombu
 jsonpointer==2.0          # via jsonschema
 jsonref==0.2              # via bravado-core
 jsonschema[format]==3.2.0  # via bravado-core, reana-commons
@@ -29,16 +28,15 @@ pyyaml==5.3.1             # via bravado, bravado-core, reana-commons
 reana-commons==0.7.0a4	# via reana-workflow-engine-serial (setup.py)
 requests==2.24.0          # via bravado
 rfc3987==1.3.8            # via jsonschema
-simplejson==3.17.0        # via bravado, bravado-core
+simplejson==3.17.2        # via bravado, bravado-core
 six==1.15.0               # via bravado, bravado-core, jsonschema, pyrsistent, python-dateutil
 strict-rfc3339==0.7       # via jsonschema
 swagger-spec-validator==2.7.3  # via bravado-core
 typing-extensions==3.7.4.2  # via bravado
-urllib3==1.25.9           # via requests
+urllib3==1.25.10          # via requests
 vine==1.3.0               # via amqp
 webcolors==1.11.1         # via jsonschema
 werkzeug==1.0.1           # via reana-commons
-zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
