@@ -57,6 +57,8 @@ def build_job_spec(
     unpacked_image,
     kubernetes_uid,
     voms_proxy,
+    htcondor_max_runtime,
+    htcondor_accounting_group,
 ):
     """Build job specification to passed to RJC."""
     job_spec = {
@@ -74,6 +76,8 @@ def build_job_spec(
         "unpacked_img": unpacked_image,
         "kubernetes_uid": kubernetes_uid,
         "voms_proxy": voms_proxy,
+        "htcondor_max_runtime": htcondor_max_runtime,
+        "htcondor_accounting_group": htcondor_accounting_group,
     }
     return job_spec
 
