@@ -1,16 +1,17 @@
 Changes
 =======
 
-Version master (UNRELEASED)
----------------------------
+Version 0.7.0 (2020-10-20)
+--------------------------
 
-- Uses python3.8
-- Pins all Python dependencies allowing to easily rebuild component images at later times.
-- Allows to execute workflow from specified step.
-- Allows specifying unpacked Docker images as workflow step requirement.
-- Adds ``kubernetes_uid`` field.
-- Adds VOMS proxy support as a new authentication method.
-- Add Black formatter support.
+- Adds possibility to execute workflow from specified step.
+- Adds option to specify unpacked Docker images as workflow step requirement.
+- Adds option to specify Kubernetes UID for jobs.
+- Adds support for VOMS proxy as a new authentication method.
+- Adds pinning of all Python dependencies allowing to easily rebuild component images at later times.
+- Changes base image to use Python 3.8.
+- Changes code formatting to respect ``black`` coding style.
+- Changes documentation to single-page layout.
 
 Version 0.6.1 (2020-05-25)
 --------------------------
