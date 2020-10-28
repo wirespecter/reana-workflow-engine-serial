@@ -2,14 +2,14 @@
 REANA-Workflow-Engine-Serial
 ############################
 
-.. image:: https://img.shields.io/travis/reanahub/reana-workflow-engine-serial.svg
-   :target: https://travis-ci.org/reanahub/reana-workflow-engine-serial
+.. image:: https://github.com/reanahub/reana-workflow-engine-serial/workflows/CI/badge.svg
+   :target: https://github.com/reanahub/reana-workflow-engine-serial/actions
 
 .. image:: https://readthedocs.org/projects/reana-workflow-engine-serial/badge/?version=latest
    :target: https://reana-workflow-engine-serial.readthedocs.io/en/latest/?badge=latest
 
-.. image:: https://img.shields.io/coveralls/reanahub/reana-workflow-engine-serial.svg
-   :target: https://coveralls.io/r/reanahub/reana-workflow-engine-serial
+.. image:: https://codecov.io/gh/reanahub/reana-workflow-engine-serial/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/reanahub/reana-workflow-engine-serial
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :target: https://gitter.im/reanahub/reana?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
