@@ -5,6 +5,7 @@
 #    pip-compile --output-file=requirements.txt setup.py
 #
 amqp==2.6.1               # via kombu
+appdirs==1.4.4            # via fs
 attrs==19.3.0             # via jsonschema
 bravado-core==5.17.0      # via bravado
 bravado==10.3.2           # via reana-commons
@@ -12,6 +13,7 @@ certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 checksumdir==1.1.9        # via reana-commons
 click==7.1.2              # via reana-commons, reana-workflow-engine-serial (setup.py)
+fs==2.4.11                # via reana-commons
 idna==2.10                # via jsonschema, requests
 jsonpointer==2.0          # via jsonschema
 jsonref==0.2              # via bravado-core
@@ -23,13 +25,13 @@ msgpack-python==0.5.6     # via bravado
 msgpack==1.0.0            # via bravado-core
 pyrsistent==0.16.0        # via jsonschema
 python-dateutil==2.8.1    # via bravado, bravado-core
-pytz==2020.1              # via bravado-core
+pytz==2020.1              # via bravado-core, fs
 pyyaml==5.3.1             # via bravado, bravado-core, reana-commons
-reana-commons==0.8.0a1	# via reana-workflow-engine-serial (setup.py)
+reana-commons==0.8.0a8    # via reana-workflow-engine-serial (setup.py)
 requests==2.24.0          # via bravado
 rfc3987==1.3.8            # via jsonschema
 simplejson==3.17.2        # via bravado, bravado-core
-six==1.15.0               # via bravado, bravado-core, jsonschema, mock, pyrsistent, python-dateutil
+six==1.15.0               # via bravado, bravado-core, fs, jsonschema, mock, pyrsistent, python-dateutil
 strict-rfc3339==0.7       # via jsonschema
 swagger-spec-validator==2.7.3  # via bravado-core
 typing-extensions==3.7.4.2  # via bravado

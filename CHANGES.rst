@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.7.1 (2020-11-10)
+--------------------------
+
+- Adds support for specifying ``htcondor_max_runtime`` and ``htcondor_accounting_group`` for HTCondor compute backend jobs.
+
 Version 0.7.0 (2020-10-20)
 --------------------------
 
