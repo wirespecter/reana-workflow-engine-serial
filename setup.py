@@ -40,7 +40,7 @@ setup_requires = [
 
 install_requires = [
     "click>=7",
-    "reana-commons>=0.7.1,<0.8.0",
+    "reana-commons>=0.7.2,<0.8.0",
 ]
 
 packages = find_packages()
