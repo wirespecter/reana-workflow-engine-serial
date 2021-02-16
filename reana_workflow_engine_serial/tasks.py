@@ -18,7 +18,10 @@ from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL, SHARED_VOLUME_PATH
 from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
-from reana_commons.utils import check_connection_to_job_controller
+from reana_commons.utils import (
+    check_connection_to_job_controller,
+    handle_workflow_engine_graceful_exit,
+)
 
 from .config import CACHE_ENABLED
 from .utils import (
@@ -37,7 +40,8 @@ from .utils import (
     sanitize_command,
 )
 
-rjc_api_client = JobControllerAPIClient("reana-job-controller")
+RJC_API_CLIENT = JobControllerAPIClient("reana-job-controller")
+PUBLISHER = WorkflowStatusPublisher()
 
 
 @click.command()
@@ -62,6 +66,7 @@ rjc_api_client = JobControllerAPIClient("reana-job-controller")
     help="Options to be passed to the workflow engine" " (e.g. caching).",
     callback=load_json,
 )
+@handle_workflow_engine_graceful_exit(publisher=PUBLISHER)
 def run_serial_workflow(
     workflow_uuid,
     workflow_workspace,
@@ -72,7 +77,7 @@ def run_serial_workflow(
     """Run a serial workflow."""
     try:
         check_connection_to_job_controller()
-        workflow_workspace, publisher, cache_enabled, = initialize(
+        workflow_workspace, cache_enabled, = initialize(
             workflow_uuid, workflow_workspace, operational_options
         )
 
@@ -82,7 +87,7 @@ def run_serial_workflow(
             operational_options,
             workflow_uuid,
             workflow_workspace,
-            publisher,
+            PUBLISHER,
             cache_enabled,
         )
 
@@ -91,8 +96,8 @@ def run_serial_workflow(
     except Exception as e:
         logging.debug(str(e))
         status = "failed"
-        if publisher:
-            publish_workflow_failure(None, workflow_uuid, publisher)
+        if PUBLISHER:
+            publish_workflow_failure(None, workflow_uuid, PUBLISHER)
         else:
             logging.error(
                 "Workflow {workflow_uuid} failed but status "
@@ -100,7 +105,7 @@ def run_serial_workflow(
             )
 
     finally:
-        cleanup(workflow_uuid, workflow_workspace, publisher, status)
+        cleanup(workflow_uuid, workflow_workspace, PUBLISHER, status)
 
 
 def initialize(workflow_uuid, workflow_workspace, operational_options):
@@ -125,10 +130,7 @@ def initialize(workflow_uuid, workflow_workspace, operational_options):
     # build workspace path
     workflow_workspace = "{0}/{1}".format(SHARED_VOLUME_PATH, workflow_workspace)
 
-    # create a MQ publisher
-    publisher = WorkflowStatusPublisher()
-
-    return workflow_workspace, publisher, cache_enabled
+    return workflow_workspace, cache_enabled
 
 
 def run(
@@ -198,7 +200,7 @@ def run_step(
 
         if cache_enabled:
             cached_info = check_cache(
-                rjc_api_client, job_spec_copy, step, workflow_workspace
+                RJC_API_CLIENT, job_spec_copy, step, workflow_workspace
             )
             if (
                 cached_info.get("result_path")
@@ -217,13 +219,13 @@ def run_step(
                     workflow_uuid,
                 )
                 continue
-        response = rjc_api_client.submit(**job_spec)
+        response = RJC_API_CLIENT.submit(**job_spec)
         job_id = str(response["job_id"])
         publish_job_submission(
             step_number, command, workflow_json, job_id, publisher, workflow_uuid
         )
 
-        job_status = poll_job_status(rjc_api_client, job_id)
+        job_status = poll_job_status(RJC_API_CLIENT, job_id)
         if job_status.status == "succeeded":
             cache_dir_path = None
             if cache_enabled:
