@@ -13,15 +13,9 @@ from __future__ import absolute_import, print_function
 import logging
 import os
 
-import click
-from reana_commons.api_client import JobControllerAPIClient
 from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL, SHARED_VOLUME_PATH
-from reana_commons.publisher import WorkflowStatusPublisher
 from reana_commons.serial import serial_load
-from reana_commons.utils import (
-    check_connection_to_job_controller,
-    handle_workflow_engine_graceful_exit,
-)
+from reana_commons.workflow_engine import create_workflow_engine_command
 
 from .config import CACHE_ENABLED
 from .utils import (
@@ -30,7 +24,6 @@ from .utils import (
     copy_workspace_from_cache,
     copy_workspace_to_cache,
     get_targeted_workflow_steps,
-    load_json,
     poll_job_status,
     publish_cache_copy,
     publish_job_submission,
@@ -40,75 +33,8 @@ from .utils import (
     sanitize_command,
 )
 
-RJC_API_CLIENT = JobControllerAPIClient("reana-job-controller")
-PUBLISHER = WorkflowStatusPublisher()
 
-
-@click.command()
-@click.option("--workflow-uuid", required=True, help="UUID of workflow to be run.")
-@click.option(
-    "--workflow-workspace",
-    required=True,
-    help="Name of workspace in which workflow should run.",
-)
-@click.option(
-    "--workflow-json",
-    help="JSON representation of workflow object to be run.",
-    callback=load_json,
-)
-@click.option(
-    "--workflow-parameters",
-    help="JSON representation of parameters received by" " the workflow.",
-    callback=load_json,
-)
-@click.option(
-    "--operational-options",
-    help="Options to be passed to the workflow engine" " (e.g. caching).",
-    callback=load_json,
-)
-@handle_workflow_engine_graceful_exit(publisher=PUBLISHER)
-def run_serial_workflow(
-    workflow_uuid,
-    workflow_workspace,
-    workflow_json=None,
-    workflow_parameters=None,
-    operational_options=None,
-):
-    """Run a serial workflow."""
-    try:
-        check_connection_to_job_controller()
-        workflow_workspace, cache_enabled, = initialize(
-            workflow_uuid, workflow_workspace, operational_options
-        )
-
-        run(
-            workflow_json,
-            workflow_parameters,
-            operational_options,
-            workflow_uuid,
-            workflow_workspace,
-            PUBLISHER,
-            cache_enabled,
-        )
-
-        status = "finished"
-
-    except Exception as e:
-        logging.debug(str(e))
-        status = "failed"
-        if PUBLISHER:
-            publish_workflow_failure(None, workflow_uuid, PUBLISHER)
-        else:
-            logging.error(
-                "Workflow {workflow_uuid} failed but status "
-                "could not be published.".format(workflow_uuid=workflow_uuid)
-            )
-
-    finally:
-        cleanup(workflow_uuid, workflow_workspace, PUBLISHER, status)
-
-
-def initialize(workflow_uuid, workflow_workspace, operational_options):
+def initialize(workflow_workspace, operational_options):
     """Initialize engine."""
     # configure the logger
     logging.basicConfig(level=REANA_LOG_LEVEL, format=REANA_LOG_FORMAT)
@@ -134,12 +60,13 @@ def initialize(workflow_uuid, workflow_workspace, operational_options):
 
 
 def run(
+    publisher,
+    rjc_api_client,
     workflow_json,
     workflow_parameters,
     operational_options,
     workflow_uuid,
     workflow_workspace,
-    publisher,
     cache_enabled,
 ):
     """Run a serial workflow."""
@@ -155,6 +82,7 @@ def run(
 
     for step_number, step in enumerate(steps_to_run):
         status = run_step(
+            rjc_api_client,
             step_number,
             step,
             workflow_workspace,
@@ -169,6 +97,7 @@ def run(
 
 
 def run_step(
+    rjc_api_client,
     step_number,
     step,
     workflow_workspace,
@@ -200,7 +129,7 @@ def run_step(
 
         if cache_enabled:
             cached_info = check_cache(
-                RJC_API_CLIENT, job_spec_copy, step, workflow_workspace
+                rjc_api_client, job_spec_copy, step, workflow_workspace
             )
             if (
                 cached_info.get("result_path")
@@ -219,13 +148,13 @@ def run_step(
                     workflow_uuid,
                 )
                 continue
-        response = RJC_API_CLIENT.submit(**job_spec)
+        response = rjc_api_client.submit(**job_spec)
         job_id = str(response["job_id"])
         publish_job_submission(
             step_number, command, workflow_json, job_id, publisher, workflow_uuid
         )
 
-        job_status = poll_job_status(RJC_API_CLIENT, job_id)
+        job_status = poll_job_status(rjc_api_client, job_id)
         if job_status.status == "succeeded":
             cache_dir_path = None
             if cache_enabled:
@@ -248,10 +177,33 @@ def run_step(
     return job_status.status
 
 
-def cleanup(workflow_uuid, workflow_workspace, publisher, status):
-    """Do cleanup tasks before exiting."""
-    logging.info(
-        f"Workflow {workflow_uuid} {status}. Files available "
-        f"at {workflow_workspace}."
+def run_serial_workflow_engine_adapter(
+    publisher,
+    rjc_api_client,
+    workflow_uuid=None,
+    workflow_json=None,
+    workflow_workspace=None,
+    workflow_parameters=None,
+    operational_options=None,
+    **kwargs
+):
+    """Run a serial workflow."""
+    workflow_workspace, cache_enabled, = initialize(
+        workflow_workspace, operational_options
     )
-    publisher.close()
+
+    run(
+        publisher,
+        rjc_api_client,
+        workflow_json,
+        workflow_parameters,
+        operational_options,
+        workflow_uuid,
+        workflow_workspace,
+        cache_enabled,
+    )
+
+
+run_serial_workflow = create_workflow_engine_command(
+    run_serial_workflow_engine_adapter, engine_type="serial"
+)

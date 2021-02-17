@@ -8,7 +8,6 @@
 
 """REANA-Workflow-Engine-Serial utilities."""
 
-import base64
 import json
 import logging
 import os
@@ -23,12 +22,6 @@ from .config import JOB_STATUS_POLLING_INTERVAL, MOUNT_CVMFS
 def sanitize_command(command):
     """Sanitize command."""
     return ";".join(command.split(";")[1:])
-
-
-def load_json(ctx, param, value):
-    """Load json callback function."""
-    value = str.encode(value[1:])
-    return json.loads(base64.standard_b64decode(value).decode())
 
 
 def escape_shell_arg(shell_arg):
