@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.7.3 (UNRELEASED)
+--------------------------
+
+- Changes workflow engine instantiation to use central REANA-Commons factory.
+
 Version 0.7.2 (2021-02-03)
 --------------------------
 

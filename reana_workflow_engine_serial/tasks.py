@@ -92,7 +92,7 @@ def run(
             publisher,
             workflow_uuid,
         )
-        if status != "succeeded":
+        if status != "finished":
             break
 
 
@@ -155,7 +155,7 @@ def run_step(
         )
 
         job_status = poll_job_status(rjc_api_client, job_id)
-        if job_status.status == "succeeded":
+        if job_status.status == "finished":
             cache_dir_path = None
             if cache_enabled:
                 cache_dir_path = copy_workspace_to_cache(job_id, workflow_workspace)

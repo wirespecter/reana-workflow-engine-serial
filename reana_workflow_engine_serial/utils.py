@@ -121,13 +121,13 @@ def publish_cache_copy(
         workflow_status = 2
     else:
         workflow_status = 1
-    succeeded_jobs = {"total": 1, "job_ids": [job_id]}
+    finished_jobs = {"total": 1, "job_ids": [job_id]}
     publisher.publish_workflow_status(
         workflow_uuid,
         workflow_status,
         message={
             "progress": build_progress_message(
-                finished=succeeded_jobs, cached=succeeded_jobs
+                finished=finished_jobs, cached=finished_jobs
             )
         },
     )
@@ -156,7 +156,7 @@ def poll_job_status(rjc_api_client, job_id):
     """Poll for job status."""
     job_status = rjc_api_client.check_status(job_id)
 
-    while job_status.status not in ["succeeded", "failed"]:
+    while job_status.status not in ["finished", "failed"]:
         job_status = rjc_api_client.check_status(job_id)
         sleep(JOB_STATUS_POLLING_INTERVAL)
 
