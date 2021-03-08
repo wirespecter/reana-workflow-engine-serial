@@ -5,6 +5,7 @@ Version 0.7.3 (UNRELEASED)
 --------------------------
 
 - Changes workflow engine instantiation to use central REANA-Commons factory.
+- Changes job command strings by removing interpreter and using central REANA-Commons job command serialisation.
 
 Version 0.7.2 (2021-02-03)
 --------------------------

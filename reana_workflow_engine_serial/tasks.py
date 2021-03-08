@@ -30,7 +30,6 @@ from .utils import (
     publish_job_success,
     publish_workflow_failure,
     publish_workflow_start,
-    sanitize_command,
 )
 
 
@@ -125,7 +124,7 @@ def run_step(
         )
 
         job_spec_copy = dict(job_spec)
-        job_spec_copy["cmd"] = sanitize_command(job_spec_copy["cmd"])
+        job_spec_copy["cmd"] = command
 
         if cache_enabled:
             cached_info = check_cache(

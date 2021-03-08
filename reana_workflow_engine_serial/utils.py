@@ -8,7 +8,6 @@
 
 """REANA-Workflow-Engine-Serial utilities."""
 
-import json
 import logging
 import os
 from distutils.dir_util import copy_tree
@@ -17,26 +16,6 @@ from time import sleep
 from reana_commons.utils import build_caching_info_message, build_progress_message
 
 from .config import JOB_STATUS_POLLING_INTERVAL, MOUNT_CVMFS
-
-
-def sanitize_command(command):
-    """Sanitize command."""
-    return ";".join(command.split(";")[1:])
-
-
-def escape_shell_arg(shell_arg):
-    """Escape double quotes.
-
-    :param shell_arg: The shell argument to be escaped.
-    """
-    if type(shell_arg) is not str:
-        msg = (
-            "ERROR: escape_shell_arg() expected string argument but "
-            "got '%s' of type '%s'." % (repr(shell_arg), type(shell_arg))
-        )
-        raise TypeError(msg)
-
-    return "%s" % shell_arg.replace('"', '\\"')
 
 
 def build_job_spec(
@@ -57,9 +36,7 @@ def build_job_spec(
     job_spec = {
         "image": image,
         "compute_backend": compute_backend,
-        "cmd": 'bash -c "cd {0} ; {1} "'.format(
-            workflow_workspace, escape_shell_arg(command)
-        ),
+        "cmd": "cd {0} && {1}".format(workflow_workspace, command),
         "prettified_cmd": command,
         "workflow_workspace": workflow_workspace,
         "job_name": job_name,
