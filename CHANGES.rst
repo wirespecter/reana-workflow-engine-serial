@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version 0.7.4 (UNRELEASED)
+--------------------------
+- Adds support for specifying ``kubernetes_memory_limit`` for Kubernetes compute backend jobs.
+
 Version 0.7.3 (2021-03-17)
 --------------------------
 
