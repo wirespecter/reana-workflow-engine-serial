@@ -8,8 +8,6 @@
 
 """REANA-Workflow-Engine-Serial utilities."""
 
-import base64
-import json
 import logging
 import os
 from distutils.dir_util import copy_tree
@@ -18,32 +16,6 @@ from time import sleep
 from reana_commons.utils import build_caching_info_message, build_progress_message
 
 from .config import JOB_STATUS_POLLING_INTERVAL, MOUNT_CVMFS
-
-
-def sanitize_command(command):
-    """Sanitize command."""
-    return ";".join(command.split(";")[1:])
-
-
-def load_json(ctx, param, value):
-    """Load json callback function."""
-    value = str.encode(value[1:])
-    return json.loads(base64.standard_b64decode(value).decode())
-
-
-def escape_shell_arg(shell_arg):
-    """Escape double quotes.
-
-    :param shell_arg: The shell argument to be escaped.
-    """
-    if type(shell_arg) is not str:
-        msg = (
-            "ERROR: escape_shell_arg() expected string argument but "
-            "got '%s' of type '%s'." % (repr(shell_arg), type(shell_arg))
-        )
-        raise TypeError(msg)
-
-    return "%s" % shell_arg.replace('"', '\\"')
 
 
 def build_job_spec(
@@ -56,6 +28,7 @@ def build_job_spec(
     kerberos,
     unpacked_image,
     kubernetes_uid,
+    kubernetes_memory_limit,
     voms_proxy,
     htcondor_max_runtime,
     htcondor_accounting_group,
@@ -64,9 +37,7 @@ def build_job_spec(
     job_spec = {
         "image": image,
         "compute_backend": compute_backend,
-        "cmd": 'bash -c "cd {0} ; {1} "'.format(
-            workflow_workspace, escape_shell_arg(command)
-        ),
+        "cmd": "cd {0} && {1}".format(workflow_workspace, command),
         "prettified_cmd": command,
         "workflow_workspace": workflow_workspace,
         "job_name": job_name,
@@ -75,6 +46,7 @@ def build_job_spec(
         "kerberos": kerberos,
         "unpacked_img": unpacked_image,
         "kubernetes_uid": kubernetes_uid,
+        "kubernetes_memory_limit": kubernetes_memory_limit,
         "voms_proxy": voms_proxy,
         "htcondor_max_runtime": htcondor_max_runtime,
         "htcondor_accounting_group": htcondor_accounting_group,
@@ -128,13 +100,13 @@ def publish_cache_copy(
         workflow_status = 2
     else:
         workflow_status = 1
-    succeeded_jobs = {"total": 1, "job_ids": [job_id]}
+    finished_jobs = {"total": 1, "job_ids": [job_id]}
     publisher.publish_workflow_status(
         workflow_uuid,
         workflow_status,
         message={
             "progress": build_progress_message(
-                finished=succeeded_jobs, cached=succeeded_jobs
+                finished=finished_jobs, cached=finished_jobs
             )
         },
     )
@@ -163,7 +135,7 @@ def poll_job_status(rjc_api_client, job_id):
     """Poll for job status."""
     job_status = rjc_api_client.check_status(job_id)
 
-    while job_status.status not in ["succeeded", "failed"]:
+    while job_status.status not in ["finished", "failed"]:
         job_status = rjc_api_client.check_status(job_id)
         sleep(JOB_STATUS_POLLING_INTERVAL)
 
