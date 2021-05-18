@@ -39,7 +39,6 @@ setup_requires = [
 ]
 
 install_requires = [
-    "click>=7",
     "reana-commons>=0.7.5a2,<0.8.0",
 ]
 
