@@ -19,7 +19,7 @@ readme = open("README.rst").read()
 history = open("CHANGES.rst").read()
 
 tests_require = [
-    "pytest-reana>=0.7.1,<0.8.0",
+    "pytest-reana>=0.7.2,<0.8.0",
 ]
 
 extras_require = {
@@ -39,7 +39,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "reana-commons>=0.7.5a2,<0.8.0",
+    "reana-commons>=0.7.5,<0.8.0",
 ]
 
 packages = find_packages()
