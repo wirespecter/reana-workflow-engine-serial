@@ -13,7 +13,7 @@ from __future__ import absolute_import, print_function
 import logging
 import os
 
-from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL, SHARED_VOLUME_PATH
+from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL
 from reana_commons.serial import serial_load
 from reana_commons.workflow_engine import create_workflow_engine_command
 
@@ -51,9 +51,6 @@ def initialize(workflow_workspace, operational_options):
             cache_enabled = False
     else:
         cache_enabled = False
-
-    # build workspace path
-    workflow_workspace = "{0}/{1}".format(SHARED_VOLUME_PATH, workflow_workspace)
 
     return workflow_workspace, cache_enabled
 
