@@ -27,7 +27,7 @@ pyrsistent==0.18.0        # via jsonschema
 python-dateutil==2.8.2    # via bravado, bravado-core
 pytz==2021.3              # via bravado-core, fs
 pyyaml==5.4.1             # via bravado, bravado-core, reana-commons
-reana-commons==0.8.0a34	# via reana-workflow-engine-serial (setup.py)
+reana-commons==0.8.0	# via reana-workflow-engine-serial (setup.py)
 requests==2.26.0          # via bravado
 rfc3987==1.3.8            # via jsonschema
 simplejson==3.17.5        # via bravado, bravado-core
