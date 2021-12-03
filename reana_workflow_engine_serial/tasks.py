@@ -67,6 +67,8 @@ def run(
 ):
     """Run a serial workflow."""
     operational_options = operational_options or {}
+    publish_workflow_start(workflow_json.get("steps", []), workflow_uuid, publisher)
+
     expanded_workflow_json = serial_load(None, workflow_json, workflow_parameters)
     steps_to_run = get_targeted_workflow_steps(
         expanded_workflow_json,
@@ -74,7 +76,6 @@ def run(
         operational_options.get("FROM", None),
     )
     workflow_json["steps"] = expanded_workflow_json["steps"] = steps_to_run
-    publish_workflow_start(steps_to_run, workflow_uuid, publisher)
 
     for step_number, step in enumerate(steps_to_run):
         status = run_step(

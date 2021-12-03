@@ -169,10 +169,10 @@ def publish_job_success(
     publisher.publish_workflow_status(workflow_uuid, workflow_status, message=message)
 
 
-def publish_workflow_start(workflow_json, workflow_uuid, publisher):
+def publish_workflow_start(workflow_steps, workflow_uuid, publisher) -> None:
     """Publish to MQ the start of the workflow."""
     total_commands = 0
-    for step in workflow_json:
+    for step in workflow_steps:
         total_commands += len(step["commands"])
     total_jobs = {"total": total_commands, "job_ids": []}
     publisher.publish_workflow_status(

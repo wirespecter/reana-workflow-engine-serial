@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.8.1 (UNRELEASED)
+---------------------------
+
+- Fixes workflow stuck in pending status due to early engine fail.
+
 Version 0.8.0 (2021-11-22)
 --------------------------
 
