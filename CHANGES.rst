@@ -4,6 +4,7 @@ Changes
 Version 0.8.1 (UNRELEASED)
 ---------------------------
 
+- Adds support for specifying ``kubernetes_job_timeout`` for Kubernetes compute backend jobs.
 - Fixes workflow stuck in pending status due to early engine fail.
 
 Version 0.8.0 (2021-11-22)
