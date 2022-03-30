@@ -186,9 +186,10 @@ def run_serial_workflow_engine_adapter(
     **kwargs
 ):
     """Run a serial workflow."""
-    workflow_workspace, cache_enabled, = initialize(
-        workflow_workspace, operational_options
-    )
+    (
+        workflow_workspace,
+        cache_enabled,
+    ) = initialize(workflow_workspace, operational_options)
 
     run(
         publisher,

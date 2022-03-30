@@ -19,12 +19,19 @@ readme = open("README.rst").read()
 history = open("CHANGES.rst").read()
 
 tests_require = [
-    "pytest-reana>=0.9.0a1,<0.10.0",
+    "pytest-reana>=0.9.0a3,<0.10.0",
 ]
 
 extras_require = {
-    "debug": ["wdb", "ipdb", "Flask-DebugToolbar",],
-    "docs": ["Sphinx>=1.5.1", "sphinx-rtd-theme>=0.1.9",],
+    "debug": [
+        "wdb",
+        "ipdb",
+        "Flask-DebugToolbar",
+    ],
+    "docs": [
+        "Sphinx>=1.5.1",
+        "sphinx-rtd-theme>=0.1.9",
+    ],
     "tests": tests_require,
 }
 
@@ -39,7 +46,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "reana-commons>=0.9.0a5,<0.10.0",
+    "reana-commons>=0.9.0a6,<0.10.0",
 ]
 
 packages = find_packages()
@@ -59,7 +66,9 @@ setup(
     author="REANA",
     author_email="info@reana.io",
     url="https://github.com/reanahub/reana-workflow-engine-serial",
-    packages=["reana_workflow_engine_serial",],
+    packages=[
+        "reana_workflow_engine_serial",
+    ],
     zip_safe=False,
     entry_points={
         "console_scripts": [
