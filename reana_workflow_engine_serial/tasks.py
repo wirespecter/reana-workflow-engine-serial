@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of REANA.
-# Copyright (C) 2018, 2019, 2020, 2021 CERN.
+# Copyright (C) 2018, 2019, 2020, 2021, 2022 CERN.
 #
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -121,6 +121,8 @@ def run_step(
             voms_proxy=step.get("voms_proxy", False),
             htcondor_max_runtime=step.get("htcondor_max_runtime", ""),
             htcondor_accounting_group=step.get("htcondor_accounting_group", ""),
+            slurm_partition=step.get("slurm_partition"),
+            slurm_time=step.get("slurm_time"),
         )
         job_spec_copy = dict(job_spec)
         job_spec_copy["cmd"] = command

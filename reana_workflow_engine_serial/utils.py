@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of REANA.
-# Copyright (C) 2019, 2020, 2021 CERN.
+# Copyright (C) 2019, 2020, 2021, 2022 CERN.
 #
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -33,6 +33,8 @@ def build_job_spec(
     voms_proxy,
     htcondor_max_runtime,
     htcondor_accounting_group,
+    slurm_partition,
+    slurm_time,
 ):
     """Build job specification to passed to RJC."""
     job_spec = {
@@ -52,6 +54,8 @@ def build_job_spec(
         "voms_proxy": voms_proxy,
         "htcondor_max_runtime": htcondor_max_runtime,
         "htcondor_accounting_group": htcondor_accounting_group,
+        "slurm_partition": slurm_partition,
+        "slurm_time": slurm_time,
     }
     return job_spec
 
