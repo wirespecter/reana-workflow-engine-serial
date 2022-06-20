@@ -17,7 +17,7 @@ from reana_commons.config import REANA_LOG_FORMAT, REANA_LOG_LEVEL
 from reana_commons.serial import serial_load
 from reana_commons.workflow_engine import create_workflow_engine_command
 
-from .config import CACHE_ENABLED
+from .config import CACHE_ENABLED, WORKFLOW_KERBEROS
 from .utils import (
     build_job_spec,
     check_cache,
@@ -113,7 +113,7 @@ def run_step(
             command=command,
             workflow_workspace=workflow_workspace,
             workflow_uuid=workflow_uuid,
-            kerberos=step.get("kerberos", False),
+            kerberos=step.get("kerberos", WORKFLOW_KERBEROS),
             unpacked_image=step.get("unpacked_image", False),
             kubernetes_uid=step.get("kubernetes_uid"),
             kubernetes_memory_limit=step.get("kubernetes_memory_limit"),
