@@ -119,6 +119,7 @@ def run_step(
             kubernetes_memory_limit=step.get("kubernetes_memory_limit"),
             kubernetes_job_timeout=step.get("kubernetes_job_timeout"),
             voms_proxy=step.get("voms_proxy", False),
+            rucio=step.get("rucio", False),
             htcondor_max_runtime=step.get("htcondor_max_runtime", ""),
             htcondor_accounting_group=step.get("htcondor_accounting_group", ""),
             slurm_partition=step.get("slurm_partition"),
