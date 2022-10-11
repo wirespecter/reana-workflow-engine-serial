@@ -6,39 +6,40 @@
 #
 amqp==5.1.1               # via kombu
 appdirs==1.4.4            # via fs
-attrs==21.4.0             # via jsonschema
-bravado-core==5.17.0      # via bravado
+attrs==22.1.0             # via jsonschema
+bravado-core==5.17.1      # via bravado
 bravado==10.3.2           # via reana-commons
-certifi==2021.10.8        # via requests
-charset-normalizer==2.0.12  # via requests
+certifi==2022.9.24        # via requests
+charset-normalizer==2.1.1  # via requests
 checksumdir==1.1.9        # via reana-commons
 click==8.1.3              # via reana-commons
-fs==2.4.15                # via reana-commons
-idna==3.3                 # via jsonschema, requests
+fs==2.4.16                # via reana-commons
+idna==3.4                 # via jsonschema, requests
 jsonpointer==2.3          # via jsonschema
-jsonref==0.2              # via bravado-core
+jsonref==0.3.0            # via bravado-core
 jsonschema[format]==3.2.0  # via bravado-core, reana-commons
 kombu==5.2.4              # via reana-commons
+markupsafe==2.1.1         # via werkzeug
 mock==3.0.5               # via reana-commons
 monotonic==1.6            # via bravado
 msgpack-python==0.5.6     # via bravado
-msgpack==1.0.3            # via bravado-core
+msgpack==1.0.4            # via bravado-core
 pyrsistent==0.18.1        # via jsonschema
 python-dateutil==2.8.2    # via bravado, bravado-core
-pytz==2022.1              # via bravado-core, fs
+pytz==2022.4              # via bravado-core
 pyyaml==5.4.1             # via bravado, bravado-core, reana-commons
-reana-commons==0.9.0a9	# via reana-workflow-engine-serial (setup.py)
-requests==2.27.1          # via bravado
+reana-commons==0.9.0a13   # via reana-workflow-engine-serial (setup.py)
+requests==2.28.1          # via bravado, bravado-core
 rfc3987==1.3.8            # via jsonschema
 simplejson==3.17.6        # via bravado, bravado-core
 six==1.16.0               # via bravado, bravado-core, fs, jsonschema, mock, python-dateutil
 strict-rfc3339==0.7       # via jsonschema
-swagger-spec-validator==2.7.4  # via bravado-core
-typing-extensions==4.2.0  # via bravado
-urllib3==1.26.9           # via requests
+swagger-spec-validator==2.7.6  # via bravado-core
+typing-extensions==4.4.0  # via bravado
+urllib3==1.26.12          # via requests
 vine==5.0.0               # via amqp, kombu
-webcolors==1.11.1         # via jsonschema
-werkzeug==2.1.2           # via reana-commons
+webcolors==1.12           # via jsonschema
+werkzeug==2.2.2           # via reana-commons
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
