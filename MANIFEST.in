@@ -13,6 +13,7 @@ include *.yaml
 include .flake8
 include pytest.ini
 include Dockerfile
+exclude .readthedocs.yaml
 prune docs/_build
 recursive-include reana_workflow_engine_serial *.py
 recursive-include reana_workflow_engine_serial *.json
