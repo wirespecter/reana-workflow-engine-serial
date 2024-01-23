@@ -143,7 +143,7 @@ def poll_job_status(rjc_api_client, job_id):
     """Poll for job status."""
     job_status = rjc_api_client.check_status(job_id)
 
-    while job_status.status not in ["finished", "failed"]:
+    while job_status.status not in ["finished", "failed", "stopped"]:
         job_status = rjc_api_client.check_status(job_id)
         sleep(JOB_STATUS_POLLING_INTERVAL)
 
