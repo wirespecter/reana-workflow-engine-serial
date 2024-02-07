@@ -6,7 +6,6 @@
 
 include *.json
 include *.md
-include *.rst
 include *.sh
 include *.txt
 include *.yaml
@@ -21,6 +20,6 @@ recursive-include reana_workflow_engine_serial *.py
 recursive-include reana_workflow_engine_serial *.json
 recursive-include docs *.py
 recursive-include docs *.png
-recursive-include docs *.rst
+recursive-include docs *.md
 recursive-include docs *.txt
 recursive-include tests *.py

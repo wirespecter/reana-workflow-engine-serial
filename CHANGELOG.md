@@ -1,0 +1,104 @@
+# Changelog
+
+## 0.9.2 (2023-12-12)
+
+- Adds automated multi-platform container image building for amd64 and arm64 architectures.
+- Adds metadata labels to Dockerfile.
+- Fixes container image building on the arm64 architecture.
+
+## 0.9.1 (2023-09-27)
+
+- Fixes container image names to be Podman-compatible.
+
+## 0.9.0 (2023-01-19)
+
+- Adds support for specifying `slurm_partition` and `slurm_time` for Slurm compute backend jobs.
+- Adds support for Kerberos authentication for workflow orchestration.
+- Adds support for Rucio authentication for workflow jobs.
+- Changes the base image of the component to Ubuntu 20.04 LTS and reduces final Docker image size by removing build-time dependencies.
+
+## 0.8.1 (2022-02-07)
+
+- Adds support for specifying `kubernetes_job_timeout` for Kubernetes compute backend jobs.
+- Fixes workflow stuck in pending status due to early engine fail.
+
+## 0.8.0 (2021-11-22)
+
+- Adds support for custom workspace paths.
+
+## 0.7.5 (2021-07-05)
+
+- Changes internal dependencies to remove click.
+
+## 0.7.4 (2021-04-28)
+
+- Adds support for specifying `kubernetes_memory_limit` for Kubernetes compute backend jobs.
+
+## 0.7.3 (2021-03-17)
+
+- Changes workflow engine instantiation to use central REANA-Commons factory.
+- Changes job command strings by removing interpreter and using central REANA-Commons job command serialisation.
+- Changes status `succeeded` to `finished` to use central REANA nomenclature.
+
+## 0.7.2 (2021-02-03)
+
+- Fixes minor code warnings.
+- Changes CI system to include Python flake8 and Dockerfile hadolint checkers.
+
+## 0.7.1 (2020-11-10)
+
+- Adds support for specifying `htcondor_max_runtime` and `htcondor_accounting_group` for HTCondor compute backend jobs.
+
+## 0.7.0 (2020-10-20)
+
+- Adds possibility to execute workflow from specified step.
+- Adds option to specify unpacked Docker images as workflow step requirement.
+- Adds option to specify Kubernetes UID for jobs.
+- Adds support for VOMS proxy as a new authentication method.
+- Adds pinning of all Python dependencies allowing to easily rebuild component images at later times.
+- Changes base image to use Python 3.8.
+- Changes code formatting to respect `black` coding style.
+- Changes documentation to single-page layout.
+
+## 0.6.1 (2020-05-25)
+
+- Upgrades REANA-Commons package using latest Kubernetes Python client version.
+
+## 0.6.0 (2019-12-20)
+
+- Allows to specify compute backend (HTCondor, Kubernetes or Slurm) and
+  Kerberos authentication requirement for Serial workflow jobs.
+- Allows partial workflow execution until step specified by the user.
+- Moves workflow engine to the same Kubernetes pod with the REANA-Job-Controller
+  (sidecar pattern).
+
+## 0.5.0 (2019-04-23)
+
+- Makes workflow engine independent of Celery so that independent workflow
+  instances are created on demand for each user.
+- Replaces `api_client` module with centralised one from REANA-Commons.
+- Introduces CVMFS mounts in job specifications.
+- Makes docker image slimmer by using `python:3.6-slim`.
+- Centralises log level and log format configuration.
+
+## 0.4.0 (2018-11-06)
+
+- Improves AMQP re-connection handling. Switches from `pika` to `kombu`.
+- Utilises common openapi client for communication with REANA-Job-Controller.
+- Changes license to MIT.
+
+## 0.3.2 (2018-09-25)
+
+- Modifies OS related commands for CephFS compatibility.
+
+## 0.3.1 (2018-09-07)
+
+- Adds parameter passing to workflow steps.
+- Adds user guide and getting started sections to the documentation.
+
+## 0.3.0 (2018-08-10)
+
+- Initial public release.
+- Executes serial workflows.
+- Tracks progress of workflow runs.
+- Caches job results by default.
