@@ -63,7 +63,7 @@ ENV TERM=xterm \
 
 # Set image labels
 LABEL org.opencontainers.image.authors="team@reanahub.io"
-LABEL org.opencontainers.image.created="2023-12-12"
+LABEL org.opencontainers.image.created="2024-03-04"
 LABEL org.opencontainers.image.description="REANA reproducible analysis platform - Serial workflow engine component"
 LABEL org.opencontainers.image.documentation="https://reana-workflow-engine-serial.readthedocs.io/"
 LABEL org.opencontainers.image.licenses="MIT"
@@ -72,5 +72,5 @@ LABEL org.opencontainers.image.title="reana-workflow-engine-serial"
 LABEL org.opencontainers.image.url="https://github.com/reanahub/reana-workflow-engine-serial"
 LABEL org.opencontainers.image.vendor="reanahub"
 # x-release-please-start-version
-LABEL org.opencontainers.image.version="0.9.2"
+LABEL org.opencontainers.image.version="0.9.3"
 # x-release-please-end

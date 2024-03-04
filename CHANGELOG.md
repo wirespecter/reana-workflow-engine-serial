@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.9.3](https://github.com/reanahub/reana-workflow-engine-serial/compare/0.9.2...0.9.3) (2024-03-04)
+
+
+### Build
+
+* **docker:** install correct extras of reana-commons submodule ([#196](https://github.com/reanahub/reana-workflow-engine-serial/issues/196)) ([b23f4df](https://github.com/reanahub/reana-workflow-engine-serial/commit/b23f4df602d80d62626e8e907181a8c710eb662f))
+* **docker:** non-editable submodules in "latest" mode ([#190](https://github.com/reanahub/reana-workflow-engine-serial/issues/190)) ([03a15cf](https://github.com/reanahub/reana-workflow-engine-serial/commit/03a15cfa7973152f9923ecade412d8eab3ea80e3))
+* **python:** bump all required packages as of 2024-03-04 ([#200](https://github.com/reanahub/reana-workflow-engine-serial/issues/200)) ([ffc8aec](https://github.com/reanahub/reana-workflow-engine-serial/commit/ffc8aec739e2284f301586d47618ff6c4142643a))
+* **python:** bump shared REANA packages as of 2024-03-04 ([#200](https://github.com/reanahub/reana-workflow-engine-serial/issues/200)) ([47c26cc](https://github.com/reanahub/reana-workflow-engine-serial/commit/47c26ccfbfdfc7419c4a6fab1d7abf95a667e4e2))
+
+
+### Bug fixes
+
+* **progress:** handle stopped jobs ([#195](https://github.com/reanahub/reana-workflow-engine-serial/issues/195)) ([a232a76](https://github.com/reanahub/reana-workflow-engine-serial/commit/a232a76627e09bfb401de4f547540c6012357986))
+
+
+### Code refactoring
+
+* **docs:** move from reST to Markdown ([#198](https://github.com/reanahub/reana-workflow-engine-serial/issues/198)) ([7507d12](https://github.com/reanahub/reana-workflow-engine-serial/commit/7507d1243af43f4621e117f4f92569f4dd7271f6))
+
+
+### Continuous integration
+
+* **commitlint:** addition of commit message linter ([#191](https://github.com/reanahub/reana-workflow-engine-serial/issues/191)) ([b7a6ef1](https://github.com/reanahub/reana-workflow-engine-serial/commit/b7a6ef18dae95efae7af791094b5ff79369705b0))
+* **commitlint:** allow release commit style ([#201](https://github.com/reanahub/reana-workflow-engine-serial/issues/201)) ([b50b6d0](https://github.com/reanahub/reana-workflow-engine-serial/commit/b50b6d0398fc6d6e4c4704d3698d811b7088921d))
+* **commitlint:** check for the presence of concrete PR number ([#197](https://github.com/reanahub/reana-workflow-engine-serial/issues/197)) ([1813ac3](https://github.com/reanahub/reana-workflow-engine-serial/commit/1813ac3a88cd8e33a59040c6bd72ed048a151654))
+* **release-please:** initial configuration ([#191](https://github.com/reanahub/reana-workflow-engine-serial/issues/191)) ([d40a675](https://github.com/reanahub/reana-workflow-engine-serial/commit/d40a675cab6b6e8c7631d503358016d427bdac3c))
+* **release-please:** update version in Dockerfile ([#194](https://github.com/reanahub/reana-workflow-engine-serial/issues/194)) ([52c34ec](https://github.com/reanahub/reana-workflow-engine-serial/commit/52c34ec2003fd09b8a65ef3cff61b7f9a105041e))
+* **shellcheck:** fix exit code propagation ([#197](https://github.com/reanahub/reana-workflow-engine-serial/issues/197)) ([5565b29](https://github.com/reanahub/reana-workflow-engine-serial/commit/5565b29ac7b431561af2cd43e6ed882bbdf57126))
+
+
+### Documentation
+
+* **authors:** complete list of contributors ([#199](https://github.com/reanahub/reana-workflow-engine-serial/issues/199)) ([e9b25b6](https://github.com/reanahub/reana-workflow-engine-serial/commit/e9b25b6ab37421971d02c52422ed19fce249b4ea))
+
 ## 0.9.2 (2023-12-12)
 
 - Adds automated multi-platform container image building for amd64 and arm64 architectures.
