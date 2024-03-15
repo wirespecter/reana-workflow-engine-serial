@@ -19,7 +19,7 @@ readme = open("README.md").read()
 history = open("CHANGELOG.md").read()
 
 tests_require = [
-    "pytest-reana>=0.9.2,<0.10.0",
+    "pytest-reana>=0.95.0a2,<0.96.0",
 ]
 
 extras_require = {
@@ -48,7 +48,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    "reana-commons>=0.9.8,<0.10.0",
+    "reana-commons>=0.95.0a2,<0.96.0",
 ]
 
 packages = find_packages()
