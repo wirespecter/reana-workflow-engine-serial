@@ -16,7 +16,7 @@ charset-normalizer==3.3.2  # via requests
 checksumdir==1.1.9        # via reana-commons
 click==8.1.7              # via reana-commons
 fs==2.4.16                # via reana-commons
-idna==3.6                 # via jsonschema, requests
+idna==3.7                 # via jsonschema, requests
 jsonpointer==2.4          # via jsonschema
 jsonref==1.1.0            # via bravado-core
 jsonschema[format]==3.2.0  # via bravado-core, reana-commons, swagger-spec-validator
