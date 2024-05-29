@@ -79,6 +79,7 @@ setup(
             "reana_workflow_engine_serial.tasks:run_serial_workflow",
         ]
     },
+    python_requires=">=3.8",
     install_requires=install_requires,
     extras_require=extras_require,
     setup_requires=setup_requires,
