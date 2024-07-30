@@ -43,10 +43,6 @@ for key, reqs in extras_require.items():
         continue
     extras_require["all"].extend(reqs)
 
-setup_requires = [
-    "pytest-runner>=2.7",
-]
-
 install_requires = [
     "reana-commons>=0.95.0a2,<0.96.0",
 ]
@@ -82,7 +78,6 @@ setup(
     python_requires=">=3.8",
     install_requires=install_requires,
     extras_require=extras_require,
-    setup_requires=setup_requires,
     tests_require=tests_require,
     classifiers=[
         "Development Status :: 3 - Alpha",
