@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.95.0](https://github.com/wirespecter/reana-workflow-engine-serial/compare/0.9.3...0.95.0) (2024-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **python:** drop support for Python 3.6 and 3.7
+
+### Build
+
+* **docker:** pin setuptools to v70 ([#214](https://github.com/wirespecter/reana-workflow-engine-serial/issues/214)) ([c6ae076](https://github.com/wirespecter/reana-workflow-engine-serial/commit/c6ae076bf4c8be9b5018e6acb7b0f94cce134184))
+* **docker:** upgrade to Ubuntu 24.04 and Python 3.12 ([#213](https://github.com/wirespecter/reana-workflow-engine-serial/issues/213)) ([5ded981](https://github.com/wirespecter/reana-workflow-engine-serial/commit/5ded981a6c4b22dc49ee4306aed860a4881c9dd3))
+* **python:** add minimal `pyproject.toml` ([#214](https://github.com/wirespecter/reana-workflow-engine-serial/issues/214)) ([c3cd6f6](https://github.com/wirespecter/reana-workflow-engine-serial/commit/c3cd6f65d9450dd40a3f9c49461db27283798925))
+* **python:** drop support for Python 3.6 and 3.7 ([#208](https://github.com/wirespecter/reana-workflow-engine-serial/issues/208)) ([c5f68ab](https://github.com/wirespecter/reana-workflow-engine-serial/commit/c5f68aba7305f37755722a88b7a79f49a61b1ebf))
+* **python:** remove deprecated `pytest-runner` ([#214](https://github.com/wirespecter/reana-workflow-engine-serial/issues/214)) ([5beb31e](https://github.com/wirespecter/reana-workflow-engine-serial/commit/5beb31efbc5dd7ce688fa559621aaf63ee1ed388))
+* **python:** use optional deps instead of `tests_require` ([#214](https://github.com/wirespecter/reana-workflow-engine-serial/issues/214)) ([906d439](https://github.com/wirespecter/reana-workflow-engine-serial/commit/906d4397e9670fac20c515a73eeed78567635fc3))
+
+
+### Continuous integration
+
+* **actions:** update GitHub actions due to Node 16 deprecation ([#204](https://github.com/wirespecter/reana-workflow-engine-serial/issues/204)) ([8ca85c0](https://github.com/wirespecter/reana-workflow-engine-serial/commit/8ca85c0b85a93b60d6202ebdd8ac955bb635a1a9))
+* **commitlint:** improve checking of merge commits ([#215](https://github.com/wirespecter/reana-workflow-engine-serial/issues/215)) ([00514b3](https://github.com/wirespecter/reana-workflow-engine-serial/commit/00514b3639e7b2ded09953628f3ac8346ef57db2))
+* **pytest:** invoke `pytest` directly instead of `setup.py test` ([#214](https://github.com/wirespecter/reana-workflow-engine-serial/issues/214)) ([3e58d5a](https://github.com/wirespecter/reana-workflow-engine-serial/commit/3e58d5a0dbe61c5c97c628d243cb639a0b3dfd99))
+
+
+### Chores
+
+* **master:** release 0.95.0-alpha.1 ([5d34691](https://github.com/wirespecter/reana-workflow-engine-serial/commit/5d34691ed5fde8d38720b742bd9921cd52b7fa0e))
+
 ## [0.9.3](https://github.com/reanahub/reana-workflow-engine-serial/compare/0.9.2...0.9.3) (2024-03-04)
 
 
